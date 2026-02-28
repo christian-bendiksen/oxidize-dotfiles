@@ -1,0 +1,469 @@
+/* =========================================================
+   Oxidize Bar — HOLO ORBIT (Kinetic Edition)
+   Radically different: glass + aurora + “gyro” workspaces
+   with rotating rings + lively micro-animations everywhere.
+
+   Notes (GTK realities):
+   - True `transform: rotate()` can be clipped/unsupported depending on GTK.
+     This theme fakes “spin” via moving striped/ring textures + pulsing rings.
+   - Active workspace growth stays layout-safe via negative margin (no scale()).
+   ========================================================= */
+
+
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
+@define-color accent      #7fbbb3;
+@define-color foreground  #d3c6aa;
+@define-color background  #2d353b;
+
+@define-color ink         alpha(@foreground, 0.94);
+@define-color quiet       alpha(@foreground, 0.64);
+@define-color whisper     alpha(@foreground, 0.40);
+
+@define-color glass       alpha(@background, 0.42);
+@define-color glass2      alpha(@background, 0.26);
+@define-color edge        alpha(@foreground, 0.10);
+@define-color edge_hi     alpha(@foreground, 0.18);
+
+@define-color a0          alpha(@accent, 0.06);
+@define-color a1          alpha(@accent, 0.14);
+@define-color a2          alpha(@accent, 0.28);
+@define-color a3          alpha(@accent, 0.46);
+
+@define-color glow_soft   alpha(@accent, 0.10);
+@define-color glow_mid    alpha(@accent, 0.18);
+@define-color glow_hot    alpha(@accent, 0.30);
+
+
+/* =========================================================
+   WINDOW
+   ========================================================= */
+window { background: transparent; }
+
+
+/* =========================================================
+   BAR ROOT
+   ========================================================= */
+#bar {
+  background: transparent;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", "Inter", "Cantarell", sans-serif;
+  font-size: 10.6px;
+  font-weight: 650;
+  letter-spacing: 0.30px;
+  color: @ink;
+}
+
+
+/* =========================================================
+   BAR BACKGROUND  (#bar-bg)  — height + aurora + glass
+   ========================================================= */
+@keyframes aurora-drift {
+  0%   { background-position:  0% 50%,  0% 50%,  0 0; }
+  50%  { background-position: 100% 50%, 60% 60%,  0 0; }
+  100% { background-position:  0% 50%,  0% 50%,  0 0; }
+}
+
+#bar-bg {
+  /* ▼ THE ONE TRUE BAR HEIGHT */
+  min-height: 32px;
+
+  background:
+    /* soft highlight */
+    linear-gradient(to bottom,
+      alpha(@foreground, 0.040) 0%,
+      transparent               44%),
+    /* aurora ribbon */
+    linear-gradient(110deg,
+      alpha(@accent, 0.22)  0%,
+      alpha(@accent, 0.06) 28%,
+      alpha(@foreground, 0.06) 46%,
+      alpha(@accent, 0.10) 68%,
+      alpha(@accent, 0.22) 100%),
+    /* glass base */
+    linear-gradient(to bottom,
+      @glass 0%,
+      @glass2 100%);
+
+  background-size: 240% 240%, 220% 220%, 100% 100%;
+  animation: aurora-drift 22s ease-in-out infinite;
+
+  box-shadow:
+    0 1px 0 @edge,
+    inset 0 1px 0 alpha(@foreground, 0.05),
+    0 10px 30px alpha(black, 0.28);
+}
+
+
+/* =========================================================
+   BAR FX (#bar-fx) — moving grain + scan + sparkle specks
+   (Rust: can_target=false)
+   ========================================================= */
+@keyframes fx-scan {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to   { background-position: 0 48px, 64px 64px, 180px 0; }
+}
+
+#bar-fx {
+  background:
+    /* scanlines */
+    repeating-linear-gradient(
+      to bottom,
+      transparent               0 7px,
+      alpha(@foreground, 0.008) 7px 8px
+    ),
+    /* grain hatch */
+    repeating-linear-gradient(
+      45deg,
+      transparent               0 2px,
+      alpha(@foreground, 0.006) 2px 3px
+    ),
+    /* spark specks (faked with thin vertical glints) */
+    repeating-linear-gradient(
+      90deg,
+      transparent              0 23px,
+      alpha(@accent, 0.010)   23px 24px,
+      transparent             24px 61px,
+      alpha(@foreground, 0.008) 61px 62px
+    );
+  animation: fx-scan 7.5s linear infinite;
+  opacity: 0.75;
+}
+
+
+/* =========================================================
+   BAR FOREGROUND  (#bar-fg) — layout only
+   ========================================================= */
+#bar-fg { background: transparent; padding: 0; }
+
+
+/* =========================================================
+   REGIONS — slightly tighter + more “floating” feel
+   ========================================================= */
+.region-bg { background: transparent; }
+.region-fx { background: transparent; }
+
+#left-fg   { padding: 0 6px 0 12px; }
+#center-fg { padding: 0 8px; }
+#right-fg  { padding: 0 12px 0 6px; }
+
+#workspaces-bg, #workspaces-fx,
+#modules-bg,    #modules-fx {
+  background: transparent;
+}
+
+
+/* =========================================================
+   UNIVERSAL ITEM — “glass capsule” + breathing underlay + lively hover
+   ========================================================= */
+button.item {
+  all: unset;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+button.item:focus { outline: none; box-shadow: none; }
+
+@keyframes capsule-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 1px @edge_hi, 0 2px 12px alpha(black, 0.18); }
+  50%      { box-shadow: inset 0 0 0 1px alpha(@accent, 0.18), 0 4px 18px alpha(black, 0.22); }
+}
+
+.surface {
+  border-radius: 999px;
+  background: transparent;
+}
+
+.surface > .content {
+  padding: 0 13px;
+  min-height: 23px;
+  background: transparent;
+}
+
+.surface > .underlay {
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      alpha(@background, 0.26),
+      alpha(@background, 0.12));
+  box-shadow:
+    inset 0 0 0 1px @edge_hi,
+    0 2px 12px alpha(black, 0.18);
+  animation: capsule-breathe 4.8s ease-in-out infinite;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* FX layer: slow “energy sweep” even at rest (very subtle) */
+@keyframes energy-sweep {
+  from { background-position: -220px 0; }
+  to   { background-position:  220px 0; }
+}
+
+.surface > .overlay {
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg,
+      transparent          0%,
+      alpha(@accent, 0.05) 35%,
+      alpha(@accent, 0.12) 50%,
+      alpha(@accent, 0.05) 65%,
+      transparent          100%);
+  background-size: 420px 100%;
+  background-position: -220px 0;
+  opacity: 0.18;
+  animation: energy-sweep 5.4s linear infinite;
+  transition: opacity 160ms ease;
+}
+
+/* Hover: more “alive” */
+button.item:hover > .surface > .underlay {
+  background:
+    linear-gradient(180deg,
+      alpha(@background, 0.36),
+      alpha(@background, 0.18));
+  box-shadow:
+    inset 0 0 0 1px alpha(@accent, 0.32),
+    0 6px 22px alpha(black, 0.22),
+    0 0 18px @glow_soft;
+}
+button.item:hover > .surface > .overlay {
+  opacity: 0.70;
+  animation-duration: 1.8s;
+}
+
+/* Press: tighten */
+button.item:active > .surface > .underlay {
+  box-shadow:
+    inset 0 0 0 1px alpha(@accent, 0.24),
+    0 2px 10px alpha(black, 0.18);
+}
+button.item:active > .surface > .overlay {
+  opacity: 0.30;
+}
+
+/* Labels */
+.label.icon   { color: @ink;   opacity: 0.86; }
+.label.text   { color: @ink;   opacity: 0.98; font-weight: 650; }
+.label.suffix { color: @quiet; opacity: 0.84; }
+
+
+/* =========================================================
+   WORKSPACES — “Gyro Rings”
+   - Base: small circular core
+   - Hover: ring brightens
+   - Active: larger core + rotating ring illusion + pulse
+   ========================================================= */
+
+button.ws {
+  all: unset;
+  background: transparent;
+  margin: 0 6px;      /* base gap */
+  padding: 0;
+  -gtk-icon-size: 0;
+}
+button.ws:focus { outline: none; box-shadow: none; }
+
+.ws-surface { background: transparent; border-radius: 999px; }
+
+.ws-content {
+  /* core size (dot) */
+  min-width:  10px;
+  min-height: 10px;
+  padding: 0;
+  background: transparent;
+  transition:
+    min-width  220ms cubic-bezier(0.20, 0, 0, 1),
+    min-height 220ms cubic-bezier(0.20, 0, 0, 1);
+}
+
+.ws-label { font-size: 0; opacity: 0; min-width: 0; min-height: 0; }
+
+/* Underlay = core */
+.ws-underlay {
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 35%,
+      alpha(@foreground, 0.22) 0%,
+      alpha(@foreground, 0.12) 45%,
+      alpha(@foreground, 0.08) 100%);
+  box-shadow:
+    inset 0 0 0 1px @edge,
+    0 0 0 0 alpha(@accent, 0.0);
+  transition:
+    background  160ms ease,
+    box-shadow  200ms ease,
+    border-radius 220ms cubic-bezier(0.20, 0, 0, 1);
+}
+
+/* Overlay = “ring texture” (fake rotation by moving pattern) */
+@keyframes ring-spin {
+  0%   { background-position: 0   0,   0   0; opacity: 0.25; }
+  50%  { background-position: 24px 16px, 48px 0; opacity: 0.42; }
+  100% { background-position: 0   0,   96px 0; opacity: 0.25; }
+}
+
+.ws-overlay {
+  border-radius: 999px;
+  background:
+    /* dashed ring illusion */
+    repeating-linear-gradient(
+      45deg,
+      transparent            0 3px,
+      alpha(@accent, 0.12)   3px 4px
+    ),
+    /* soft halo */
+    radial-gradient(circle,
+      alpha(@accent, 0.18) 0%,
+      transparent          65%);
+  background-size: 18px 18px, 100% 100%;
+  opacity: 0.0;
+  transition: opacity 180ms ease;
+}
+
+/* Hover: show the ring, brighten core */
+button.ws:hover .ws-underlay {
+  background:
+    radial-gradient(circle at 35% 35%,
+      alpha(@foreground, 0.30) 0%,
+      alpha(@foreground, 0.16) 45%,
+      alpha(@foreground, 0.10) 100%);
+  box-shadow: inset 0 0 0 1px alpha(@foreground, 0.22);
+}
+button.ws:hover .ws-overlay {
+  opacity: 0.55;
+  animation: ring-spin 2.2s linear infinite;
+}
+
+/* Active: core grows (layout-safe) + ring always spins + pulse */
+@keyframes ws-core-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px alpha(@accent, 0.36),
+      0 0  8px alpha(@accent, 0.16),
+      0 0  0px alpha(@accent, 0.0);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px alpha(@accent, 0.62),
+      0 0 16px alpha(@accent, 0.26),
+      0 0 26px alpha(@accent, 0.10);
+  }
+}
+
+/* Grow via content min-size */
+button.ws.active .ws-content,
+.ws-surface.active .ws-content {
+  min-width:  18px;
+  min-height: 18px;
+}
+
+/* Absorb growth: base margin 6px -> 6 - (18-10)/2 = 2px */
+button.ws.active { margin: 0 2px; }
+
+/* Active core */
+.ws-underlay.active,
+button.ws.active .ws-underlay {
+  background:
+    radial-gradient(circle at 35% 35%,
+      alpha(@accent, 0.44) 0%,
+      alpha(@accent, 0.22) 48%,
+      alpha(@accent, 0.14) 100%);
+  animation: ws-core-pulse 2.4s ease-in-out infinite;
+}
+
+/* Active ring */
+.ws-surface.active .ws-overlay,
+button.ws.active .ws-overlay {
+  opacity: 1.0;
+  animation: ring-spin 1.35s linear infinite;
+}
+
+
+/* =========================================================
+   CLOCK — “command capsule” with stronger aura
+   ========================================================= */
+#clock { margin: 0; }
+
+#clock > .surface { border-radius: 999px; }
+
+#clock > .surface > .content {
+  padding: 0 18px;
+  min-height: 23px;
+}
+
+#clock > .surface > .underlay {
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg,
+      alpha(@background, 0.40),
+      alpha(@background, 0.16));
+  box-shadow:
+    inset 0 0 0 1px alpha(@accent, 0.26),
+    0 10px 26px alpha(black, 0.24),
+    0 0 26px alpha(@accent, 0.10);
+}
+
+#clock > .surface > .overlay {
+  border-radius: 999px;
+  opacity: 0.42;
+  animation: energy-sweep 3.2s linear infinite;
+}
+
+#clock .label.text {
+  font-variant-numeric: tabular-nums;
+  font-weight: 780;
+  letter-spacing: 0.90px;
+  color: @ink;
+  opacity: 1.0;
+}
+
+#clock:hover > .surface > .underlay {
+  box-shadow:
+    inset 0 0 0 1px alpha(@accent, 0.38),
+    0 12px 30px alpha(black, 0.26),
+    0 0 34px alpha(@accent, 0.14);
+}
+#clock:hover > .surface > .overlay {
+  opacity: 0.78;
+  animation-duration: 1.6s;
+}
+
+
+/* =========================================================
+   MODULES — subtle status animation hooks
+   ========================================================= */
+button.item.module { margin: 0 3px; }
+#module-brightness { margin-left:  0; }
+#module-battery    { margin-right: 0; }
+
+button.item.module .label.text { color: @quiet; }
+button.item.module:hover .label.text { color: @ink; transition: color 140ms ease; }
+
+/* Volume: “meter” feel via underlay bottom accent */
+#module-volume > .surface > .underlay {
+  box-shadow:
+    inset 0 0 0 1px @edge_hi,
+    inset 0 -2px 0 alpha(@accent, 0.22),
+    0 2px 12px alpha(black, 0.18);
+}
+#module-volume .label.text.muted { color: @whisper; opacity: 0.72; }
+#module-volume .label.text.low   { color: mix(@accent, @foreground, 0.42); }
+
+/* Battery: critical flare */
+@keyframes batt-flare {
+  0%, 100% { opacity: 0.86; }
+  50%      { opacity: 1.00; }
+}
+#module-battery .label.text.charging { color: mix(@accent, @foreground, 0.40); }
+#module-battery .label.text.low      { color: mix(#ffaa44, @foreground, 0.52); }
+#module-battery .label.text.critical {
+  color: alpha(@accent, 0.98);
+  animation: batt-flare 1.2s ease-in-out infinite;
+}
+#module-battery:has(.label.text.critical) > .surface > .underlay {
+  animation: ws-core-pulse 1.2s ease-in-out infinite;
+}
+
+/* Brightness: dim/bright hint */
+#module-brightness .label.text.dim    { color: @whisper; opacity: 0.74; }
+#module-brightness .label.text.bright { color: mix(@accent, @foreground, 0.34); }

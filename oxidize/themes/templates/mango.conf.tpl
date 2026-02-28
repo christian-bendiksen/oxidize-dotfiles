@@ -1,0 +1,9 @@
+shadowscolor = 0x{{ background_strip }}ff
+rootcolor = 0x{{ background_strip }}ff
+bordercolor = 0x{{ foreground_strip }}ff
+focuscolor = 0x{{ accent_strip }}ff
+maximizescreencolor = 0x{{ selection_background_strip }}ff
+urgentcolor = 0x{{ color2_strip }}ff
+scratchpadcolor = 0x{{ color5_strip }}ff
+globalcolor = 0x{{ foreground_strip }}ff
+overlaycolor = 0x{{ color15_strip }}ff

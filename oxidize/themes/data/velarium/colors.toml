@@ -1,0 +1,24 @@
+accent = "#e7c46a"
+cursor = "#f3e8c9"
+foreground = "#eee2c6"
+background = "#16120b"
+selection_foreground = "#16120b"
+selection_background = "#f3e8c9"
+
+color0  = "#2a2317"   # dark bronze shadow
+color1  = "#d4a24a"   # deep gold
+color2  = "#c8b77a"   # pale antique gold
+color3  = "#e7c46a"   # bright gold
+color4  = "#b8bfc6"   # brushed silver
+color5  = "#d6bfe6"   # platinum violet
+color6  = "#9fbfbb"   # cool silver-teal
+color7  = "#eee2c6"   # warm ivory
+
+color8  = "#3a3122"
+color9  = "#f0b85c"
+color10 = "#dfd29b"
+color11 = "#ffe7a3"
+color12 = "#d1d8df"
+color13 = "#ead8ff"
+color14 = "#bfe7e2"
+color15 = "#fff7de"
