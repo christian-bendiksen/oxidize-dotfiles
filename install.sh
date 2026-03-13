@@ -53,6 +53,51 @@ if ! command -v cargo &>/dev/null; then
 fi
 ok "found cargo ($(command -v cargo))"
 
+# Install system dependencies
+section "Installing dependencies via moss"
+
+PACKAGES=(
+    alacritty awww btop build-essential cava curl
+    gpu-screen-recorder grim slurp helix mangowc
+    power-profiles-daemon walker yaru-icon-theme
+    waybar
+)
+
+info "Running: sudo moss install -u ${PACKAGES[*]}"
+sudo moss install -y "${PACKAGES[@]}"
+ok "Dependencies installed"
+
+# Install Jetbrains Mono Nerd font
+section "Installing Jetbrains Mono Nerd Font"
+
+FONT_DIR="$HOME/.local/share/fonts/JetbrainsMono"
+if [[ -d "$FONT_DIR" ]]; then
+    ok "JetBrains Mono Nerd Font already installed"
+else
+    mkdir -p "$FONT_DIR"
+    curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip" \
+        -o /tmp/JetBrainsMono.zip
+    unzip -q /tmp/JetBrainsMono.zip -d "$FONT_DIR"
+    rm /tmp/JetBrainsMono.zip
+    fc-cache -f
+    ok "JetBrains Mono Nerd Font installed -> $FONT_DIR"
+fi
+
+# Install adw-gtk3 theme
+section "Installing adw-gtk3 theme"
+
+ADW_DIR="$HOME/.local/share/themes"
+if ls "$ADW_DIR"/adw-gtk3* &>/dev/null 2>&1; then
+    ok "adw-gtk3 theme already installed"
+else
+    mkdir -p "$ADW_DIR"
+    curl -fsSL "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz" \
+        -o /tmp/adw-gtk3.tar.xz
+    tar -xf /tmp/adw-gtk3.tar.xz -C "$ADW_DIR"
+    rm /tmp/adw-gtk3.tar.xz
+    ok "adw-gtk3 theme installed -> $ADW_DIR"
+fi
+
 mkdir -p "$HOME/.local/bin"
 
 # Clone oxidize-dotfiles if not already present
@@ -137,6 +182,8 @@ if grep -qF "oxidize-dotfiles aliases" "$BASHRC"; then
 else
     printf '\n%s\n' "$ALIASES_SNIPPET" >> "$BASHRC"
     ok "Added aliases source to $BASHRC"
+    # shellcheck source=/dev/null
+    source "$HOME/.bashrc"
 fi
 
 # Oxidize theme directory structure
@@ -190,6 +237,7 @@ link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.them
 # expands at runtime — no per-file symlinks needed for those.
 
 # Done
+oxidize set tokyo-night
 section "Done"
 
 printf "\n${GRN}${BLD}Installation complete.${RST}\n\n"
