@@ -1,1 +1,1 @@
-alias theme='oxidize-theme'
+alias theme='oxidize'
