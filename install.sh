@@ -54,13 +54,12 @@ fi
 ok "found cargo ($(command -v cargo))"
 
 # Install system dependencies
-# TODO: add in yaru-icon-theme once merged
 section "Installing dependencies via moss"
 
 PACKAGES=(
     alacritty awww btop build-essential cava curl
     gpu-screen-recorder grim slurp helix mangowc
-    power-profiles-daemon walker waybar
+    power-profiles-daemon walker waybar yaru-icon-theme
 )
 
 info "Running: sudo moss install -u ${PACKAGES[*]}"
