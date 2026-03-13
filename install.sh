@@ -34,12 +34,24 @@ section "Pre-flight checks"
 
 [[ "$EUID" -eq 0 ]] && die "Do not run as root."
 
-for cmd in git cargo; do
-    if ! command -v "$cmd" &>/dev/null; then
-        die "'$cmd' not found. Install it before running this script."
+# check for git
+if ! command -v git &>/dev/null; then
+    die "'git' not found. Install it before running this script."
+fi
+ok "found git ($(command -v git))"
+
+# check for cargo
+if ! command -v cargo &>/dev/null; then
+    warn "'cargo' not found - installing rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
+
+    # shellcheck source=/dev/null
+    source "$HOME/.cargo/env"
+    if ! command -v cargo &>/dev/null; then
+        die "rustup installed but 'cargo' still not found. Open a new shell and retry."
     fi
-    ok "found $cmd ($(command -v "$cmd"))"
-done
+fi
+ok "found cargo ($(command -v cargo))"
 
 mkdir -p "$HOME/.local/bin"
 
