@@ -60,6 +60,7 @@ PACKAGES=(
     alacritty awww btop build-essential cava curl
     gpu-screen-recorder grim slurp helix mangowc
     power-profiles-daemon walker waybar yaru-icon-theme
+    nautilus
 )
 
 info "Running: sudo moss install -u ${PACKAGES[*]}"

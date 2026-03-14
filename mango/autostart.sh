@@ -13,6 +13,7 @@ fi
 
 # Waybar and launcher
 awww-daemon &
+awww img ~/.config/oxidize/themes/background
 waybar &
 elephant &
 walker --gapplication-service &
