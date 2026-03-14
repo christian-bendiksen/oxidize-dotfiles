@@ -58,7 +58,7 @@ section "Installing dependencies via moss"
 
 PACKAGES=(
     alacritty awww btop build-essential cava curl
-    gpu-screen-recorder grim slurp helix mangowc
+    gpu-screen-recorder grim slurp helix niri
     power-profiles-daemon walker waybar yaru-icon-theme
     nautilus
 )

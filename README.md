@@ -10,7 +10,7 @@ curl -fsSL https://raw.githubusercontent.com/christian-bendiksen/oxidize-dotfile
 
 ## What's included
 
-- **Compositors** — MangoWC
+- **Compositors** — Niri
 - **Bar** — Waybar
 - **Terminals** — Alacritty
 - **Launcher** — Walker
