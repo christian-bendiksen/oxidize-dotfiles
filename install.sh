@@ -274,7 +274,9 @@ link "$OXIDIZE_CURRENT/niri-colors.kdl"  "$HOME/.config/niri/niri-colors.kdl"
 link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.theme"
 
 # Finalize
+section "Enable waybar systemd, setting defaults"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+systemctl --user enable --now waybar.service
 oxidize set ristretto
 
 # Done
@@ -283,4 +285,5 @@ section "Done"
 printf "Next step:\n"
 printf "  ${BLD}oxidize set <theme-name>${RST}   — apply your first theme\n"
 printf "Available themes in: $DOTFILES_DIR/oxidize/themes/data/\n\n"
+printf "For good measure: reboot and run niri-session"
     
