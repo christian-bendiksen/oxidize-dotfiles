@@ -29,6 +29,13 @@ OXIDIZE_BIN="$HOME/.local/bin/oxidize"
 OXIDIZE_CURRENT="$HOME/.config/oxidize/themes/current"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 
+# Run
+printf "\n${BLD}oxidize-dotfiles installer${RST}\n"
+printf "This will install system packages, build the oxidize binary,\n"
+printf "and symlink dotfiles into ~/.config.\n\n"
+read -r -p "Proceed with installation? [y/N] " _reply
+[[ "$_reply" =~ ^[Yy]$ ]] || { printf "Aborted.\n"; exit 0; }
+
 # Pre-flight
 section "Pre-flight checks"
 
@@ -39,6 +46,25 @@ if ! command -v git &>/dev/null; then
     die "'git' not found. Install it before running this script."
 fi
 ok "found git ($(command -v git))"
+
+# Set up volatile and Install system dependencies
+section "Setting up volatile repo"
+
+sudo moss repo add volatile https://build.aerynos.dev/stream/volatile/x86_64/stone.index -p 10
+sudo moss repo enable volatile
+ok "Volatile enabled"
+
+section "Installing dependencies via moss"
+
+PACKAGES=(
+    alacritty awww btop build-essential cava curl
+    gpu-screen-recorder grim slurp helix mangowc
+    power-profiles-daemon walker waybar yaru-icon-theme
+)
+
+info "Running: sudo moss install -u ${PACKAGES[*]}"
+sudo moss install -y "${PACKAGES[@]}"
+ok "Dependencies installed"
 
 # check for cargo
 if ! command -v cargo &>/dev/null; then
@@ -52,19 +78,6 @@ if ! command -v cargo &>/dev/null; then
     fi
 fi
 ok "found cargo ($(command -v cargo))"
-
-# Install system dependencies
-section "Installing dependencies via moss"
-
-PACKAGES=(
-    alacritty awww btop build-essential cava curl
-    gpu-screen-recorder grim slurp helix mangowc
-    power-profiles-daemon walker waybar yaru-icon-theme
-)
-
-info "Running: sudo moss install -u ${PACKAGES[*]}"
-sudo moss install -y "${PACKAGES[@]}"
-ok "Dependencies installed"
 
 # Install Jetbrains Mono Nerd font
 section "Installing Jetbrains Mono Nerd Font"
@@ -99,15 +112,27 @@ fi
 
 mkdir -p "$HOME/.local/bin"
 
-# Clone oxidize-dotfiles if not already present
-section "Setting up oxidize-dotfiles"
+# Clone and setup oxidize-dotfiles
+# Resolve the current script directory
+# and move dotfiles to always live at ~/oxidize-dotfiles
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [[ -d "$DOTFILES_DIR/.git" ]]; then
-    info "Updating existing oxidize-dotfiles clone..."
+if [[ "$SCRIPT_DIR" == "$DOTFILES_DIR" ]]; then
+    # already in the correct location - just pull
+    info "Updating existing exidize-dotfiles clone..."
+    git -C "$DOTFILES_DIR" pull --ff-only
+elif [[ -d "$DOTFILES_DIR/.git" ]]; then
+    info "Updating existing oxidize-dotfiles clone at $DOTFILES_DIR..."
     git -C "$DOTFILES_DIR" pull --ff-only
 else
-    info "Cloning oxidize-dotfiles -> $DOTFILES_DIR"
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    # Script is running from another directory - move the repo
+    if [[ -e "$DOTFILES_DIR" ]]; then
+        local bak="${DOTFILES_DIR}.bak.${TIMESTAMP}"
+        warn "Backing up existing '$DOTFILES_DIR' -> '$bak'"
+        mv "$DOTFILES_DIR" "$bak"
+    fi
+    info "Moving repo from $SCRIPT_DIR -> $DOTFILES_DIR"
+    mv "$SCRIPT_DIR" "$DOTFILES_DIR"
 fi
 ok "oxidize-dotfiles ready at $DOTFILES_DIR"
 
@@ -231,18 +256,13 @@ link "$OXIDIZE_CURRENT/niri-colors.kdl"  "$HOME/.config/niri/niri-colors.kdl"
 # btop looks for themes/current.theme in its themes dir
 link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.theme"
 
-# Note: kitty, alacritty, waybar, and fuzzel use in-file include/import
-# directives with ~/.config/oxidize/themes/current/... which the shell/app
-# expands at runtime — no per-file symlinks needed for those.
+# Finalize
+source "$HOME/.bashrc" 2>/dev/null || export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+oxidize set ristretto
 
 # Done
-oxidize set tokyo-night
 section "Done"
 
-printf "\n${GRN}${BLD}Installation complete.${RST}\n\n"
-printf "Runtime dependencies (install via pkgset):\n"
-printf "  niri, waybar, kitty, alacritty, mako, btop, starship,\n"
-printf "  fuzzel, walker, awww, brightnessctl, playerctl, notify-send\n\n"
 printf "Next step:\n"
 printf "  ${BLD}oxidize set <theme-name>${RST}   — apply your first theme\n"
 printf "Available themes in: $DOTFILES_DIR/oxidize/themes/data/\n\n"
