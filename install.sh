@@ -274,10 +274,9 @@ link "$OXIDIZE_CURRENT/niri-colors.kdl"  "$HOME/.config/niri/niri-colors.kdl"
 link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.theme"
 
 # Finalize
-section "Enable waybar systemd, setting defaults"
+section "Setting defaults"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-systemctl --user enable --now waybar.service
-oxidize set ristretto
+oxidize set tokyo-night
 
 # Done
 section "Done"

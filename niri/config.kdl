@@ -75,7 +75,7 @@ input {
 // Find more information on the wiki:
 // https://yalter.github.io/niri/Configuration:-Outputs
 // Remember to uncomment the node by removing "/-"!
-output "eDP-1" {
+/-output "eDP-1" {
     // Uncomment this line to disable this output.
     // off
 
@@ -271,7 +271,7 @@ layout {
 spawn-at-startup "awww-daemon"
 spawn-at-startup "elephant"
 spawn-at-startup "walker" "--gapplication-service"
-spawn-sh-at-startup "scripts/wallpaper.sh"
+spawn-sh-at-startup "$HOME/.config/niri/scripts/wallpaper.sh"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
