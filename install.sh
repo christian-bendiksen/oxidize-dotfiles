@@ -239,6 +239,7 @@ link "$DOTFILES_DIR/gtk-4.0"            "$HOME/.config/gtk-4.0"
 link "$DOTFILES_DIR/fontconfig"         "$HOME/.config/fontconfig"
 link "$DOTFILES_DIR/starship.toml"      "$HOME/.config/starship.toml"
 link "$DOTFILES_DIR/chromium-flags.conf" "$HOME/.config/chromium-flags.conf"
+link "$DOTFILES_DIR/bashrc"             "$HOME/.config/bashrc"
 
 # Link configs to oxidize current theme directory. 
 section "Wiring per-file oxidize theme symlinks"
@@ -257,7 +258,7 @@ link "$OXIDIZE_CURRENT/niri-colors.kdl"  "$HOME/.config/niri/niri-colors.kdl"
 link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.theme"
 
 # Finalize
-source "$HOME/.bashrc" 2>/dev/null || export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 oxidize set ristretto
 
 # Done
