@@ -360,7 +360,7 @@ binds {
     // Mod-Shift-/, which is usually the same as Mod-?,
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
-    Mod+Shift+W hotkey-overlay-title="Change wallpaper" { spawn "oxidize-theme" "wallpaper"; }
+    Mod+Shift+W hotkey-overlay-title="Change wallpaper" { spawn-sh "$HOME/.local/bin/oxidize wallpaper"; }
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+Return hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
