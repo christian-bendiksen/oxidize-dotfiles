@@ -278,11 +278,11 @@ section "Setting defaults"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 oxidize set tokyo-night
 
-# Done
 section "Done"
-
 printf "Next step:\n"
 printf "  ${BLD}oxidize set <theme-name>${RST}   — apply your first theme\n"
 printf "Available themes in: $DOTFILES_DIR/oxidize/themes/data/\n\n"
-printf "For good measure: reboot and run niri-session"
+printf "For good measure, reboot and then start niri-session.\n\n"
+read -r -p "Reboot now? [y/N] " _reboot_reply
+[[ "$_reboot_reply" =~ ^[Yy]$ ]] && sudo reboot
     
