@@ -269,9 +269,9 @@ layout {
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
 spawn-at-startup "awww-daemon"
-spawn-at-startup "awww" "img" "~/.config/oxidize/themes/background"
 spawn-at-startup "elephant"
 spawn-at-startup "walker" "--gapplication-service"
+spawn-sh-at-startup "scripts/wallpaper.sh"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
