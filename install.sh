@@ -61,7 +61,7 @@ PACKAGES=(
     alacritty awww btop build-essential cava curl
     gpu-screen-recorder grim slurp helix niri
     power-profiles-daemon walker waybar yaru-icon-theme
-    nautilus
+    nautilus xdg-utils
 )
 
 info "Running: sudo moss install -u ${PACKAGES[*]}"
@@ -117,11 +117,25 @@ mkdir -p "$HOME/.local/bin"
 # Clone and setup oxidize-dotfiles
 # Resolve the current script directory
 # and move dotfiles to always live at ~/oxidize-dotfiles
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}:-")" 2>/dev/null && pwd || true)"
 
-if [[ "$SCRIPT_DIR" == "$DOTFILES_DIR" ]]; then
+if [[ -z "$SCRIPT_DIR" ]]; then
+    # Running via curl pipe — no local repo, clone fresh
+    if [[ -d "$DOTFILES_DIR/.git" ]]; then
+        info "Updating existing oxidize-dotfiles clone at $DOTFILES_DIR..."
+        git -C "$DOTFILES_DIR" pull --ff-only
+    else
+        if [[ -e "$DOTFILES_DIR" ]]; then
+            bak="${DOTFILES_DIR}.bak.${TIMESTAMP}"
+            warn "Backing up existing '$DOTFILES_DIR' -> '$bak'"
+            mv "$DOTFILES_DIR" "$bak"
+        fi
+        info "Cloning oxidize-dotfiles -> $DOTFILES_DIR"
+        git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    fi
+elif [[ "$SCRIPT_DIR" == "$DOTFILES_DIR" ]]; then
     # already in the correct location - just pull
-    info "Updating existing exidize-dotfiles clone..."
+    info "Updating existing oxidize-dotfiles clone..."
     git -C "$DOTFILES_DIR" pull --ff-only
 elif [[ -d "$DOTFILES_DIR/.git" ]]; then
     info "Updating existing oxidize-dotfiles clone at $DOTFILES_DIR..."
@@ -129,7 +143,7 @@ elif [[ -d "$DOTFILES_DIR/.git" ]]; then
 else
     # Script is running from another directory - move the repo
     if [[ -e "$DOTFILES_DIR" ]]; then
-        local bak="${DOTFILES_DIR}.bak.${TIMESTAMP}"
+        bak="${DOTFILES_DIR}.bak.${TIMESTAMP}"
         warn "Backing up existing '$DOTFILES_DIR' -> '$bak'"
         mv "$DOTFILES_DIR" "$bak"
     fi
