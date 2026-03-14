@@ -271,7 +271,8 @@ layout {
 spawn-at-startup "awww-daemon"
 spawn-at-startup "elephant"
 spawn-at-startup "walker" "--gapplication-service"
-spawn-sh-at-startup "$HOME/.config/niri/scripts/wallpaper.sh"
+// Need this for the first boot, it should always be set by theme
+spawn-sh-at-startup "awww ~/.config/oxidize/themes/background --transition-type=none"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
