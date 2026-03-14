@@ -3,7 +3,7 @@
 SOCKET="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/wayland-1-awww-daemon.sock"
 for i in $(seq 1 20); do
     if [[ -S "$SOCKET" ]]; then
-        awww img "$HOME/.config/oxidize/themes/background --transition-type none"
+        awww img "$HOME/.config/oxidize/themes/background --transition-type=none"
         exit 0
     fi
     sleep 0.5
