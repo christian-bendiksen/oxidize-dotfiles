@@ -268,7 +268,7 @@ layout {
 // See the binds section below for more spawn examples.
 
 // This line starts waybar, a commonly used bar for Wayland compositors.
-spawn-sh-at-startup "~/oxidize-dotfiles/niri/scripts/services.sh"
+spawn-sh-at-startup "$HOME/oxidize-dotfiles/niri/scripts/services.sh"
 
 hotkey-overlay {
     // Uncomment this line to disable the "Important Hotkeys" pop-up at startup.
