@@ -52,7 +52,7 @@ section "Setting up volatile repo"
 
 sudo moss repo add volatile https://build.aerynos.dev/stream/volatile/x86_64/stone.index -p 10
 sudo moss repo enable volatile
-sudo moss sync -u
+sudo moss sync -u -y
 ok "Volatile enabled"
 
 section "Installing dependencies via moss"
