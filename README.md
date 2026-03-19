@@ -4,6 +4,10 @@ Wayland desktop dotfiles for AerynOS with a atomic theme switcher powered by [ox
 
 ## Install
 
+Recommended to install on a fresh AerynOS console install.
+git clone the repo and run ./install.sh
+
+## One-line install
 ```bash
 curl -fsSL https://raw.githubusercontent.com/christian-bendiksen/oxidize-dotfiles/main/install.sh | bash
 ```
@@ -16,7 +20,8 @@ curl -fsSL https://raw.githubusercontent.com/christian-bendiksen/oxidize-dotfile
 - **Launcher** — Walker
 - **Editor** — Helix
 - **Monitor** — btop
-- Many themes, switchable at runtime
+- **Themes** — Tokyo-night, everforest, gruvbox, catppuccin +++
+- Supports Omarchy themes with a colors.toml
 
 ## Usage
 
