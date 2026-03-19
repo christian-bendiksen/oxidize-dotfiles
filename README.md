@@ -20,7 +20,7 @@ curl -fsSL https://raw.githubusercontent.com/christian-bendiksen/oxidize-dotfile
 - **Launcher** — Walker
 - **Editor** — Helix
 - **Monitor** — btop
-- **Themes** — Tokyo-night, everforest, gruvbox, catppuccin +++
+- **Themes** — tokyo-night, everforest, gruvbox, catppuccin +++
 - Supports Omarchy themes with a colors.toml
 
 ## Usage
