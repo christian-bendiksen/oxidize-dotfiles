@@ -1,0 +1,87 @@
+# AerynOS — Alpine Nature Theme (btop)
+# Color story: bedrock dark, boulder shadow, lichen glow, moss accent, summit bright.
+
+# Main background
+theme[main_bg]="#0e1612"
+
+# Main text color
+theme[main_fg]="#c4c8a0"
+
+# Title color for boxes
+theme[title]="#c0a870"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#987058"
+
+# Background color of selected items
+theme[selected_bg]="#283c30"
+
+# Foreground color of selected items
+theme[selected_fg]="#4a8050"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#283c30"
+
+# Color of text appearing on top of graphs
+theme[graph_text]="#c4c8a0"
+
+# Background color of the percentage meters
+theme[meter_bg]="#283c30"
+
+# Misc colors for processes box
+theme[proc_misc]="#8a9e80"
+
+# CPU, Memory, Network, Proc box outline colors
+# Glacial (blue) / Moss (green) / Seaglass (cyan) / Bracken (warm clay)
+theme[cpu_box]="#3d6888"
+theme[mem_box]="#4a8050"
+theme[net_box]="#40907a"
+theme[proc_box]="#987058"
+
+# Box divider line and small boxes line color
+theme[div_line]="#283c30"
+
+# Temperature graph colors (Moss → Sunlit lichen → Rowan)
+theme[temp_start]="#4a8050"
+theme[temp_mid]="#8a9858"
+theme[temp_end]="#904028"
+
+# CPU graph colors (Glacial → Seaglass → Moss)
+theme[cpu_start]="#3d6888"
+theme[cpu_mid]="#40907a"
+theme[cpu_end]="#4a8050"
+
+# Mem/Disk free meter (Moss → Sunlit moss → Bright seaglass)
+theme[free_start]="#4a8050"
+theme[free_mid]="#5a9862"
+theme[free_end]="#4ea898"
+
+# Mem/Disk cached meter (Seaglass → Bright seaglass → Sunlit moss)
+theme[cached_start]="#40907a"
+theme[cached_mid]="#4ea898"
+theme[cached_end]="#5a9862"
+
+# Mem/Disk available meter (Bracken → Olive → Rowan)
+theme[available_start]="#987058"
+theme[available_mid]="#8a9858"
+theme[available_end]="#904028"
+
+# Mem/Disk used meter (Moss → Seaglass → Glacial deep)
+theme[used_start]="#4a8050"
+theme[used_mid]="#40907a"
+theme[used_end]="#3d6888"
+
+# Download graph colors (Glacial → Pale lichen → Seaglass)
+theme[download_start]="#3d6888"
+theme[download_mid]="#88a8aa"
+theme[download_end]="#4ea898"
+
+# Upload graph colors (Sunlit moss → Seaglass → Glacial)
+theme[upload_start]="#5a9862"
+theme[upload_mid]="#40907a"
+theme[upload_end]="#3d6888"
+
+# Process box color gradient (Moss → Glacial → Heather)
+theme[process_start]="#4a8050"
+theme[process_mid]="#3d6888"
+theme[process_end]="#664e72"

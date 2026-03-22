@@ -61,7 +61,7 @@ PACKAGES=(
     alacritty awww btop build-essential cava curl
     gpu-screen-recorder grim slurp helix niri
     power-profiles-daemon walker waybar yaru-icon-theme
-    nautilus xdg-utils brightnessctl
+    nautilus xdg-utils brightnessctl iwd
 )
 
 info "Running: sudo moss install -u ${PACKAGES[*]}"
@@ -273,10 +273,13 @@ link "$OXIDIZE_CURRENT/niri-colors.kdl"  "$HOME/.config/niri/niri-colors.kdl"
 # btop looks for themes/current.theme in its themes dir
 link "$OXIDIZE_CURRENT/btop.theme"       "$HOME/.config/btop/themes/current.theme"
 
+# helix base16_transparent + colors.toml
+link "$OXIDIZE_CURRENT/helix.toml"       "$HOME/.config/helix/themes/oxidize.toml"
+
 # Finalize
 section "Setting defaults"
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-oxidize set tokyo-night
+oxidize set aeryn
 
 section "Done"
 printf "Next step:\n"

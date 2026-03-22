@@ -1,0 +1,26 @@
+accent               = "#4a8050"
+cursor               = "#c8a840"
+foreground           = "#c4c8a0"
+background           = "#0e1612"
+selection_foreground = "#0e1612"
+selection_background = "#4a8050"
+
+# UI / terminal base colors
+color0  = "#0e1612"   # black         
+color1  = "#904028"   # red           (errors, diff-)
+color2  = "#4a8050"   # green         (diff+, member vars)
+color3  = "#a07848"   # yellow        (special, markup links)
+color4  = "#3d6888"   # blue          
+color5  = "#664e72"   # magenta       
+color6  = "#40907a"   # cyan          
+color7  = "#8a9e80"   # white         
+
+# syntax highlight colors
+color8  = "#283c30"   # bright black      (cursorline, selection bg)
+color9  = "#a07848"   # bright red        (constants, numbers, variables)
+color10 = "#5a9862"   # bright green      (strings)
+color11 = "#c0a870"   # bright yellow     (types, attributes)
+color12 = "#5a98c0"   # bright blue       (functions, constructors)
+color13 = "#9878a8"   # bright magenta    (keywords, labels, namespace)
+color14 = "#4ea898"   # bright cyan       (escape chars)
+color15 = "#dcdec0"   # bright white      
