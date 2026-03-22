@@ -285,7 +285,7 @@ section "Done"
 printf "Next step:\n"
 printf "  ${BLD}oxidize set <theme-name>${RST}   — apply your first theme\n"
 printf "Available themes in: $DOTFILES_DIR/oxidize/themes/data/\n\n"
-printf "For good measure, reboot and then start niri-session.\n\n"
+printf "Reboot and then start niri-session.\n\n"
 read -r -p "Reboot now? [y/N] " _reboot_reply
 [[ "$_reboot_reply" =~ ^[Yy]$ ]] && sudo reboot
     
