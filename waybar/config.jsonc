@@ -40,7 +40,7 @@
     }
   },
   "custom/oxidize": {
-    "format": "<span font='JetbrainsMono Nerd Font'> 󰌽 </span>",
+    "format": " ",
     "on-click": "walker",
     "on-click-right": "xdg-terminal-exec",
   },
@@ -68,7 +68,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "./scripts/impala.sh" // TODO: make a script that takes default set terminal instead.
+    "on-click": "~/.config/waybar/scripts/impala.sh" // TODO: make a script that takes default set terminal instead.
   },
   "battery": {
     "format": "{capacity}% {icon}",
@@ -96,7 +96,7 @@
     "format-connected": "󰂱",
     "format-no-controller": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "./scripts/bluetui.sh"
+    "on-click": "~/.config/waybar/scripts/bluetui.sh"
   },
   "pulseaudio": {
     "format": "{icon}",

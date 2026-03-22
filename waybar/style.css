@@ -32,8 +32,7 @@
 
 #cpu,
 #battery,
-#pulseaudio,
-#custom-omarchy,
+#pulseaudio,  
 #custom-update {
   min-width: 12px;
   margin: 0 7.5px;
@@ -69,6 +68,16 @@ tooltip {
 
 .hidden {
   opacity: 0;
+}
+
+#custom-oxidize {
+  background-image: url("/usr/share/icons/aerynos-logo-dark.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-width: 20px;
+  min-height: 20px;
+  margin-right: 5px
 }
 
 #custom-screenrecording-indicator,
