@@ -66,7 +66,7 @@ input {
 
     // Focus windows and outputs automatically when moving the mouse into them.
     // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
-    // focus-follows-mouse max-scroll-amount="0%"
+    focus-follows-mouse max-scroll-amount="100%"
 }
 
 // You can configure outputs by their name, which you can find
@@ -321,6 +321,18 @@ window-rule {
     // - host Firefox (app-id is "firefox")
     // - Flatpak Firefox (app-id is "org.mozilla.firefox")
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+// Window rule for Impala
+window-rule {
+    match app-id=r#"Alacritty$"# title="^Impala$"
+    open-floating true
+}
+
+// Window rule for Bluetui
+window-rule {
+    match app-id=r#"Alacritty$"# title="^Bluetui$"
     open-floating true
 }
 
