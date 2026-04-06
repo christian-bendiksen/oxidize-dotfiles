@@ -23,7 +23,7 @@ section() { printf "\n${BLD}==> %s${RST}\n" "$*"; }
 
 DOTFILES_REPO="https://github.com/christian-bendiksen/oxidize-dotfiles"
 DOTFILES_DIR="$HOME/oxidize-dotfiles"
-OXIDIZE_SRC="$HOME/.local/src/oxidize-theme"
+OXIDIZE_SRC="$HOME/.local/src/oxidize"
 OXIDIZE_BIN="$HOME/.local/bin/oxidize"
 OXIDIZE_CURRENT="$HOME/.config/oxidize/themes/current"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
@@ -154,7 +154,7 @@ if [[ -d "$OXIDIZE_SRC/.git" ]]; then
 else
     info "Cloning oxidize-theme..."
     mkdir -p "$(dirname "$OXIDIZE_SRC")"
-    git clone https://github.com/christian-bendiksen/oxidize-theme "$OXIDIZE_SRC"
+    git clone https://github.com/christian-bendiksen/oxidize "$OXIDIZE_SRC"
 fi
 
 info "Running cargo build --release (this may take a minute)..."
