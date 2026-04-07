@@ -40,9 +40,9 @@
     }
   },
   "custom/oxidize": {
-    "format": " ",
+    "format": "",
     "on-click": "walker",
-    "on-click-right": "xdg-terminal-exec",
+    "on-click-right": "", // TODO: create xdg-terminal-exec (user set preferred terminal)
   },
 
   "cpu": {

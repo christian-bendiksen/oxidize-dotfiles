@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 awww-daemon &
 elephant &
 walker --gapplication-service &

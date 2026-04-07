@@ -56,7 +56,9 @@ PACKAGES=(
     alacritty awww btop build-essential cava curl
     gpu-screen-recorder grim slurp helix niri
     power-profiles-daemon walker waybar yaru-icon-theme
-    nautilus xdg-utils brightnessctl iwd
+    nautilus xdg-utils brightnessctl iwd playerctl
+    pavucontrol impala bluetui swaylock elephant
+    swayidle
 )
 
 info "Running: sudo moss install -u ${PACKAGES[*]}"

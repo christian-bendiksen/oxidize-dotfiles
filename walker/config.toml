@@ -1,4 +1,4 @@
-force_keyboard_focus = true                                                 # forces keyboard forcus to stay in Walker
+force_keyboard_focus = true                                                 # forces keyboard focus to stay in Walker
 selection_wrap = true                                                       # wrap list if at bottom or top
 theme = "oxidize-default"                                                   # theme to use
 additional_theme_location = "./themes/"
@@ -46,4 +46,4 @@ provider = "clipboard"
 
 [[emergencies]]
 text = "Restart Walker"
-command = "omarchy-restart-walker"
+command = "pkill -x walker; walker &"
