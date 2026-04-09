@@ -1,7 +1,7 @@
 layout {
     focus-ring {
         width 2
-        active-color "{{ accent }}"
+        active-color "{{ border_active }}"
         inactive-color "{{ foreground }}"
     }
 }
