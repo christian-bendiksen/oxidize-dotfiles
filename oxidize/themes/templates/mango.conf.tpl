@@ -1,6 +1,6 @@
 shadowscolor = 0x{{ background_strip }}ff
 rootcolor = 0x{{ background_strip }}ff
-bordercolor = 0x{{ background_strip }}ff
+bordercolor = 0x{{ border_inactive_strip }}ff
 focuscolor = 0x{{ border_active_strip }}ff
 maximizescreencolor = 0x{{ selection_background_strip }}ff
 urgentcolor = 0x{{ color2_strip }}ff
