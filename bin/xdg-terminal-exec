@@ -1,0 +1,78 @@
+#!/usr/bin/env sh
+# xdg-terminal-exec — minimal fallback for the freedesktop spec.
+#
+# Reads the user's preferred terminal from ~/.config/xdg-terminals.list
+# (first readable .desktop entry wins) and launches it. If arguments are
+# passed, runs them inside the terminal via `-e`.
+#
+# Falls back to $TERMINAL, then a short probe list, if no list exists.
+
+set -eu
+
+LIST="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-terminals.list"
+APP_DIRS="$HOME/.local/share/applications:/usr/local/share/applications:/usr/share/applications"
+
+find_desktop() {
+    entry="$1"
+    case "$entry" in /*)
+        [ -r "$entry" ] && { printf '%s\n' "$entry"; return 0; }
+        return 1
+    esac
+    OLD_IFS="$IFS"
+    IFS=:
+    for d in $APP_DIRS; do
+        if [ -r "$d/$entry" ]; then
+            IFS="$OLD_IFS"
+            printf '%s\n' "$d/$entry"
+            return 0
+        fi
+    done
+    IFS="$OLD_IFS"
+    return 1
+}
+
+exec_binary() {
+    # Extract first token of Exec= in [Desktop Entry], stripping field codes.
+    awk '
+        /^\[/ { in_de = ($0 == "[Desktop Entry]") }
+        in_de && /^Exec=/ {
+            sub(/^Exec=/, "")
+            gsub(/%[fFuUdDnNickvm]/, "")
+            # first whitespace-delimited token
+            n = split($0, a, /[ \t]+/)
+            for (i = 1; i <= n; i++) if (a[i] != "") { print a[i]; exit }
+        }
+    ' "$1"
+}
+
+launch() {
+    bin="$1"; shift
+    if [ "$#" -gt 0 ]; then
+        exec "$bin" -e "$@"
+    else
+        exec "$bin"
+    fi
+}
+
+if [ -r "$LIST" ]; then
+    while IFS= read -r entry || [ -n "$entry" ]; do
+        case "$entry" in ''|\#*) continue ;; esac
+        desktop="$(find_desktop "$entry")" || continue
+        bin="$(exec_binary "$desktop")"
+        [ -z "$bin" ] && continue
+        launch "$bin" "$@"
+    done < "$LIST"
+fi
+
+if [ -n "${TERMINAL:-}" ] && command -v "$TERMINAL" >/dev/null 2>&1; then
+    launch "$TERMINAL" "$@"
+fi
+
+for term in alacritty kitty foot ghostty wezterm xterm; do
+    if command -v "$term" >/dev/null 2>&1; then
+        launch "$term" "$@"
+    fi
+done
+
+echo "xdg-terminal-exec: no terminal emulator found" >&2
+exit 1

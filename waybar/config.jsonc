@@ -40,9 +40,9 @@
     }
   },
   "custom/oxidize": {
-    "format": "",
+    "format": " ",
     "on-click": "walker",
-    "on-click-right": "", // TODO: create xdg-terminal-exec (user set preferred terminal)
+    "on-click-right": "xdg-terminal-exec"
   },
 
   "cpu": {
@@ -68,7 +68,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "~/.config/waybar/scripts/impala.sh" // TODO: make a script that takes default set terminal instead.
+    "on-click": "~/.config/waybar/scripts/impala.sh"
   },
   "battery": {
     "format": "{capacity}% {icon}",
