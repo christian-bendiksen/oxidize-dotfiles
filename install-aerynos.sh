@@ -181,7 +181,7 @@ link "$DOTFILES_DIR/bashrc"              "$HOME/.config/bashrc"
 
 section "Window-manager configs"
 
-for wm in niri mango hyprland; do
+for wm in niri mango hypr; do
     src="$DOTFILES_DIR/$wm"
     if [[ -e "$src" ]]; then
         link "$src" "$HOME/.config/$wm"
