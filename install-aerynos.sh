@@ -36,6 +36,22 @@ confirm() {
     [[ "$reply" =~ ^[Yy]$ ]]
 }
 
+pick() {
+    local label="$1"; shift
+    local opts=("$@") i reply
+    printf "  %s\n" "$label" >&2
+    for i in "${!opts[@]}"; do
+        printf "    ${BLD}%d)${RST} %s\n" "$((i+1))" "${opts[$i]}" >&2
+    done
+    while true; do
+        read -r -p "  Choice [1-${#opts[@]}]: " reply
+        if [[ "$reply" =~ ^[0-9]+$ ]] && (( reply >= 1 && reply <= ${#opts[@]} )); then
+            printf '%s' "${opts[$((reply-1))]}"; return
+        fi
+        warn "Enter a number between 1 and ${#opts[@]}" >&2
+    done
+}
+
 spin() {
     local pid="$1" msg="$2"
     local frames=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏) i=0
@@ -94,6 +110,16 @@ printf "  This will clone the dotfiles to ${BLD}~/.dotfiles${RST} and\n"
 printf "  symlink configs into ${BLD}~/.config${RST}.\n\n"
 
 confirm "Proceed with setup?" || { printf "\n  Aborted.\n\n"; exit 0; }
+
+section "Window manager"
+
+CHOSEN_WM=$(pick "Which window manager would you like to install?" niri mango hypr)
+ok "Selected: $CHOSEN_WM"
+
+PKGSET="pkgset-oxidize-${CHOSEN_WM}"
+printf "  Installing ${BLD}%s${RST}…\n" "$PKGSET"
+sudo moss install "$PKGSET" && ok "Installed $PKGSET" \
+    || warn "Failed to install $PKGSET — continuing anyway"
 
 section "Cloning dotfiles"
 
