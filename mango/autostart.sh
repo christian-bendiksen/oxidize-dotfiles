@@ -13,6 +13,7 @@ fi
 
 # Waybar and launcher
 awww-daemon &
+swayosd-server &
 awww img ~/.config/oxidize/themes/background
 waybar &
 elephant &
