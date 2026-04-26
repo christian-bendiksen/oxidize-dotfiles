@@ -164,7 +164,7 @@ link "$DOTFILES_DIR/bin/xdg-terminal-exec" "$HOME/.local/bin/xdg-terminal-exec"
 section "Common config directories"
 
 COMMON_CONFIGS=(
-    kitty alacritty waybar mako btop helix fuzzel walker
+    kitty alacritty waybar mako btop helix walker
     gtk-3.0 gtk-4.0 fontconfig
 )
 for cfg in "${COMMON_CONFIGS[@]}"; do
@@ -176,7 +176,6 @@ for cfg in "${COMMON_CONFIGS[@]}"; do
     fi
 done
 
-link "$DOTFILES_DIR/starship.toml"       "$HOME/.config/starship.toml"
 link "$DOTFILES_DIR/chromium-flags.conf" "$HOME/.config/chromium-flags.conf"
 link "$DOTFILES_DIR/bashrc"              "$HOME/.config/bashrc"
 
@@ -201,20 +200,21 @@ if [[ -e "$DOTFILES_DIR/niri" ]]; then
     link "$OXIDIZE_CURRENT/niri-colors.kdl" "$HOME/.config/niri/niri-colors.kdl"
 fi
 
-section "Bash aliases"
+section "Bash config"
 
 BASHRC="$HOME/.bashrc"
 touch "$BASHRC"
-ALIASES_SNIPPET="# oxidize-dotfiles aliases
-if [ -f \"$DOTFILES_DIR/bashrc/aliases.sh\" ]; then
-    source \"$DOTFILES_DIR/bashrc/aliases.sh\"
+ALIASES_SNIPPET="# oxidize-dotfiles bashrc
+if [ -f \"$DOTFILES_DIR/bashrc/bashrc.sh\" ]; then
+    source \"$DOTFILES_DIR/bashrc/bashrc.sh\"
 fi"
+## TODO: add fish, zsh
 
-if grep -qF "oxidize-dotfiles aliases" "$BASHRC"; then
-    ok "Aliases already sourced in .bashrc"
+if grep -qF "oxidize-dotfiles bashrc" "$BASHRC"; then
+    ok "Bash config already sourced in .bashrc"
 else
     printf '\n%s\n' "$ALIASES_SNIPPET" >> "$BASHRC"
-    ok "Added aliases to .bashrc"
+    ok "Added bash config to .bashrc"
 fi
 
 section "Applying default theme"
