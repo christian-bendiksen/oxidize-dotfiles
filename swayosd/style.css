@@ -4,6 +4,7 @@ window {
   border-radius: 0;
   opacity: 0.97;
   border: 2px solid @border-color;
+  padding: 8px 14px;
 
   background-color: @background-color;
 }
