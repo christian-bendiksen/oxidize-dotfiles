@@ -223,19 +223,6 @@ for wm in niri mango hypr; do
     fi
 done
 
-section "swaylock PAM"
-
-PAM_FILE="/etc/pam.d/swaylock"
-if [[ -f "$PAM_FILE" ]]; then
-    ok "(already exists) $PAM_FILE"
-else
-    printf "  Writing ${BLD}%s${RST}…\n" "$PAM_FILE"
-    sudo mkdir -p /etc/pam.d
-    printf 'auth include login\n' | sudo tee "$PAM_FILE" > /dev/null \
-        && ok "Created $PAM_FILE" \
-        || warn "Failed to create $PAM_FILE — swaylock authentication may not work"
-fi
-
 section "Oxidize theme wiring"
 
 link "$OXIDIZE_CURRENT/gtk.css"         "$HOME/.config/gtk-3.0/gtk.css"
