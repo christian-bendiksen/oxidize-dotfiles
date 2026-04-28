@@ -106,24 +106,21 @@ banner
 command -v git &>/dev/null || die "'git' not found — install it first."
 command -v oxidize &>/dev/null || die "'oxidize' not found — install the oxidize pkgset first."
 
-printf "  This will clone the dotfiles to ${BLD}~/.dotfiles${RST} and\n"
-printf "  symlink configs into ${BLD}~/.config${RST}.\n\n"
-
-confirm "Proceed with setup?" || { printf "\n  Aborted.\n\n"; exit 0; }
-
-section "Window manager"
-
-CHOSEN_WM=$(pick "Which window manager would you like to install?" niri mango hypr)
-ok "Selected: $CHOSEN_WM"
-
-PKGSET="pkgset-oxidize-${CHOSEN_WM}"
-printf "  Installing ${BLD}%s${RST}…\n" "$PKGSET"
-sudo moss install "$PKGSET" && ok "Installed $PKGSET" \
-    || warn "Failed to install $PKGSET — continuing anyway"
-
-section "Cloning dotfiles"
-
+IS_UPDATE=false
 if [[ -d "$DOTFILES_DIR/.git" ]]; then
+    IS_UPDATE=true
+    printf "  Existing installation detected — pulling latest changes\n"
+    printf "  and re-applying configs.\n\n"
+else
+    printf "  This will clone the dotfiles to ${BLD}~/.dotfiles${RST} and\n"
+    printf "  symlink configs into ${BLD}~/.config${RST}.\n\n"
+fi
+
+confirm "Proceed?" || { printf "\n  Aborted.\n\n"; exit 0; }
+
+section "Dotfiles"
+
+if $IS_UPDATE; then
     safe_pull "$DOTFILES_DIR"
 else
     if [[ -e "$DOTFILES_DIR" ]]; then
@@ -134,6 +131,18 @@ else
     spin $! "Cloning oxidize-dotfiles…"
     wait $!
     ok "Cloned to ~/.dotfiles"
+fi
+
+if ! $IS_UPDATE; then
+    section "Window manager"
+
+    CHOSEN_WM=$(pick "Which window manager would you like to install?" niri mango hypr)
+    ok "Selected: $CHOSEN_WM"
+
+    PKGSET="pkgset-oxidize-${CHOSEN_WM}"
+    printf "  Installing ${BLD}%s${RST}…\n" "$PKGSET"
+    sudo moss install "$PKGSET" && ok "Installed $PKGSET" \
+        || warn "Failed to install $PKGSET — continuing anyway"
 fi
 
 section "JetBrains Mono Nerd Font"
