@@ -96,7 +96,11 @@ safe_pull() {
         git -C "$dir" stash push -m "oxidize-installer-backup-${TIMESTAMP}" --quiet
         ok "Changes stashed (recover with: git -C ${dir/$HOME/\~} stash pop)"
     fi
-    git -C "$dir" pull --ff-only --quiet && ok "Updated ${dir/$HOME/\~}" \
+    git -C "$dir" fetch --quiet
+    while IFS= read -r f; do
+        [[ -f "$dir/$f" ]] && rm -f "$dir/$f"
+    done < <(git -C "$dir" diff --diff-filter=A --name-only HEAD origin/main)
+    git -C "$dir" merge --ff-only --quiet origin/main && ok "Updated ${dir/$HOME/\~}" \
         || warn "git pull failed — continuing with current state"
 }
 

@@ -1,0 +1,399 @@
+#!/usr/bin/env bash
+# oxidize-sysctl — walker-driven system controls menu.
+
+set -euo pipefail
+
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+TERMINALS_LIST="$XDG_CONFIG_HOME/xdg-terminals.list"
+DESKTOP_DIRS=(
+    "$HOME/.local/share/applications"
+    /usr/local/share/applications
+    /usr/share/applications
+)
+THEMES_DIR="$HOME/.dotfiles/oxidize/themes/data"
+
+LOCK_WARN_OFFSET=60
+LOCK_TIMER_PID="/tmp/oxidize-lock-timer.pid"
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
+}
+
+pick() {
+    local out
+    out="$(walker --dmenu --placeholder "$1")" || return 1
+    [ -n "$out" ] || return 1
+    printf '%s\n' "$out"
+}
+
+desktop_field() {
+    awk -v key="$2" '
+        /^\[/ { in_default = ($0 == "[Desktop Entry]") }
+        in_default && $0 ~ "^"key"=" {
+            sub("^"key"=", "")
+            print
+            exit
+        }
+    ' "$1"
+}
+
+list_desktops() {
+    local pattern="$1"
+    local seen=""
+    local dir file base name
+    for dir in "${DESKTOP_DIRS[@]}"; do
+        [[ -d "$dir" ]] || continue
+        for file in "$dir"/*.desktop; do
+            [[ -r "$file" ]] || continue
+            base="$(basename "$file")"
+            case ":$seen:" in *":$base:"*) continue ;; esac
+            grep -qE "$pattern" "$file" || continue
+            [[ "$(desktop_field "$file" Hidden)" == "true" ]] && continue
+            [[ "$(desktop_field "$file" NoDisplay)" == "true" ]] && continue
+            name="$(desktop_field "$file" Name)"
+            [[ -z "$name" ]] && name="$base"
+            printf '%s|%s\n' "$name" "$base"
+            seen="$seen:$base"
+        done
+    done | sort -f
+}
+
+choose_desktop() {
+    local label="$1" pattern="$2"
+    local choices name file
+    choices="$(list_desktops "$pattern")"
+    [[ -z "$choices" ]] && { notify "oxidize-sysctl" "No candidates found for $label"; return 1; }
+    name="$(printf '%s\n' "$choices" | cut -d'|' -f1 | pick "$label")" || return 1
+    [[ -z "$name" ]] && return 1
+    file="$(printf '%s\n' "$choices" | awk -F'|' -v n="$name" '$1 == n { print $2; exit }')"
+    [[ -z "$file" ]] && return 1
+    printf '%s\n' "$file"
+}
+
+set_terminal() {
+    local file
+    file="$(choose_desktop "  Terminal" '^Categories=.*TerminalEmulator')" || return 0
+    mkdir -p "$(dirname "$TERMINALS_LIST")"
+    printf '%s\n' "$file" > "$TERMINALS_LIST"
+    notify "Default terminal" "$file"
+}
+
+set_browser() {
+    local file
+    file="$(choose_desktop "󰖟  Browser" '^MimeType=.*x-scheme-handler/https')" || return 0
+    xdg-mime default "$file" \
+        x-scheme-handler/http \
+        x-scheme-handler/https \
+        text/html \
+        application/xhtml+xml
+    notify "Default browser" "$file"
+}
+
+set_file_manager() {
+    local file
+    file="$(choose_desktop "󰉋  File Manager" '^MimeType=.*inode/directory')" || return 0
+    xdg-mime default "$file" inode/directory
+    notify "Default file manager" "$file"
+}
+
+set_editor() {
+    local file
+    file="$(choose_desktop "󰏤  Editor" '^Categories=.*TextEditor')" || return 0
+    xdg-mime default "$file" text/plain
+    notify "Default editor" "$file"
+}
+
+compositor_quit() {
+    case "${XDG_CURRENT_DESKTOP:-}" in
+        *niri*) niri msg action quit ;;
+        *)
+            if pgrep -x niri >/dev/null 2>&1; then niri msg action quit
+            elif pgrep -x mango >/dev/null 2>&1; then pkill -TERM -x mango
+            elif pgrep -x Hyprland >/dev/null 2>&1; then hyprctl dispatch exit
+            else notify "oxidize-sysctl" "Unknown compositor — cannot log out"
+            fi
+            ;;
+    esac
+}
+
+idle_daemon_pid() {
+    pgrep -x hypridle 2>/dev/null | head -n1 || true
+}
+
+idle_inhibitor_status() {
+    local pid
+    pid="$(idle_daemon_pid)"
+    [[ -z "$pid" ]] && { printf 'not running'; return; }
+    local state
+    state="$(ps -o state= -p "$pid" | tr -d ' ')"
+    [[ "$state" == T* ]] && printf 'inhibited' || printf 'active'
+}
+
+toggle_idle_inhibitor() {
+    local pid
+    pid="$(idle_daemon_pid)"
+    if [[ -z "$pid" ]]; then
+        notify "Idle inhibitor" "hypridle is not running"
+        return 0
+    fi
+    local state
+    state="$(ps -o state= -p "$pid" | tr -d ' ')"
+    if [[ "$state" == T* ]]; then
+        kill -CONT "$pid"
+        notify "Idle Inhibitor" "Off"
+    else
+        kill -STOP "$pid"
+        notify "Idle Inhibitor" "On"
+    fi
+}
+
+start_lock_timer() {
+    local total="$1"
+    if [[ -f "$LOCK_TIMER_PID" ]]; then
+        kill "$(cat "$LOCK_TIMER_PID")" 2>/dev/null || true
+        rm -f "$LOCK_TIMER_PID"
+    fi
+    [[ "$total" -gt 0 ]] || return 0
+    (
+        sleep $((total - LOCK_WARN_OFFSET))
+        notify-send -u critical "Screen Lock" "Screen will lock in 1 minute"
+        sleep "$LOCK_WARN_OFFSET"
+        hyprlock
+    ) &
+    printf '%d\n' "$!" > "$LOCK_TIMER_PID"
+    disown
+}
+
+set_lock_timer() {
+    local choice total
+    choice="$(printf '%s\n' \
+        "2 minutes" "5 minutes" "10 minutes" "15 minutes" "30 minutes" "Disabled" \
+        | pick "󰔟  Lock Timer")" || return 1
+    case "$choice" in
+        "2 minutes")  total=120 ;;
+        "5 minutes")  total=300 ;;
+        "10 minutes") total=600 ;;
+        "15 minutes") total=900 ;;
+        "30 minutes") total=1800 ;;
+        "Disabled")   total=0 ;;
+        *) return 1 ;;
+    esac
+    start_lock_timer "$total"
+    notify "Lock Timer" "$choice"
+}
+
+dnd_active() {
+    command -v makoctl >/dev/null 2>&1 && makoctl mode 2>/dev/null | grep -qx dnd
+}
+
+toggle_dnd() {
+    if ! command -v makoctl >/dev/null 2>&1; then
+        notify "oxidize-sysctl" "makoctl not found"
+        return 0
+    fi
+    if dnd_active; then
+        makoctl mode -r dnd
+        notify "Do Not Disturb" "Off"
+    else
+        makoctl mode -a dnd
+        notify "Do Not Disturb" "On"
+    fi
+}
+
+current_theme() {
+    local file="$XDG_CONFIG_HOME/oxidize/themes/current.theme"
+    [[ -r "$file" ]] && tr -d '[:space:]' < "$file" || printf 'unknown'
+}
+
+list_themes() {
+    if [[ -d "$THEMES_DIR" ]]; then
+        ls -1 "$THEMES_DIR"
+    else
+        printf '%s\n' \
+            aeryn catppuccin catppuccin-latte ethereal everforest \
+            flexoki-light gruvbox hackerman kanagawa matte-black \
+            miasma nord osaka-jade ristretto rose-pine \
+            tokyo-night vantablack white
+    fi
+}
+
+themes_menu() {
+    local current
+    current="$(current_theme)"
+    local choice
+    choice="$(list_themes | pick "󰔨  Theme  ·${current}·")" || return 1
+    [[ "$choice" == "$current" ]] && { notify "Theme" "Already using $choice"; return 0; }
+    oxidize set "$choice"
+    notify "Theme" "Switched to $choice"
+}
+
+fmt_wallpaper_name() {
+    local base="${1%.*}"
+    base="${base##[0-9]*-}"
+    base="${base//-/ }"
+    printf '%s' "$base"
+}
+
+wallpaper_menu() {
+    declare -A label_to_path
+    local labels=()
+
+    while IFS= read -r path; do
+        local theme name label
+        theme="$(basename "$(dirname "$(dirname "$path")")")"
+        name="$(fmt_wallpaper_name "$(basename "$path")")"
+        label="$theme  $name"
+        label_to_path["$label"]="$path"
+        labels+=("$label")
+    done < <(find "$THEMES_DIR" -path "*/backgrounds/*" -type f \
+        \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \) \
+        | sort)
+
+    local choice
+    choice="$(printf '%s\n' "${labels[@]}" | pick "󰸉  Wallpaper")" || return 1
+
+    local path="${label_to_path[$choice]}"
+    [[ -z "$path" ]] && return 1
+
+    ln -sf "$path" "$XDG_CONFIG_HOME/oxidize/themes/background"
+    awww img "$path" 2>/dev/null || true
+    notify "Wallpaper" "$choice"
+}
+
+network_menu() {
+    local choice
+    choice="$(printf '%s\n' \
+        "󰤨  WiFi / Network" \
+        "󰂯  Bluetooth" \
+        | pick "󰤨  Network")" || return 1
+    case "$choice" in
+        "󰤨  WiFi / Network") $HOME/.dotfiles/bin/xdg-terminal-exec impala ;;
+        "󰂯  Bluetooth")      $HOME/.dotfiles.bin/xdg-terminal-exec bluetui ;;
+    esac
+}
+
+services_menu() {
+    while true; do
+        local choice
+        choice="$(printf '%s\n' \
+            "󰝘  Restart Waybar" \
+            "󰂞  Restart Notifications" \
+            "󰸉  Restart Wallpaper Daemon" \
+            "󰍉  Reload Walker" \
+            | pick "󰣖  Services")" || return 1
+        case "$choice" in
+            "󰝘  Restart Waybar")
+                pkill -x waybar 2>/dev/null || true
+                waybar &
+                disown
+                notify "Services" "Waybar restarted"
+                ;;
+            "󰂞  Restart Notifications")
+                pkill -x mako 2>/dev/null || true
+                mako &
+                disown
+                notify "Services" "Mako restarted"
+                ;;
+            "󰸉  Restart Wallpaper Daemon")
+                pkill -x awww-daemon 2>/dev/null || true
+                awww-daemon &
+                disown
+                notify "Services" "Wallpaper daemon restarted"
+                ;;
+            "󰍉  Reload Walker")
+                notify "Services" "Restarting Walker..."
+                pkill -x walker 2>/dev/null || true
+                walker &
+                disown
+                ;;
+        esac
+    done
+}
+
+power_menu() {
+    while true; do
+        local choice
+        choice="$(printf '%s\n' \
+            "󰌾  Lock" \
+            "󰒲  Suspend" \
+            "󰑓  Reboot" \
+            "󰚦  Shutdown" \
+            "󰗼  Logout" \
+            | pick "󰐥  Power")" || return 1
+        case "$choice" in
+            "󰌾  Lock")     hyprlock ;;
+            "󰒲  Suspend")  systemctl suspend ;;
+            "󰑓  Reboot")   systemctl reboot ;;
+            "󰚦  Shutdown") systemctl poweroff ;;
+            "󰗼  Logout")   compositor_quit ;;
+        esac
+    done
+}
+
+defaults_menu() {
+    while true; do
+        local choice
+        choice="$(printf '%s\n' \
+            "  Terminal" \
+            "󰖟  Browser" \
+            "󰉋  File Manager" \
+            "󰏤  Editor" \
+            | pick "󱔢  Defaults")" || return 1
+        case "$choice" in
+            "  Terminal")    set_terminal ;;
+            "󰖟  Browser")    set_browser ;;
+            "󰉋  File Manager") set_file_manager ;;
+            "󰏤  Editor")      set_editor ;;
+        esac
+    done
+}
+
+toggles_menu() {
+    while true; do
+        local dnd_icon dnd_label idle_label
+        if dnd_active; then
+            dnd_icon="󰂚"; dnd_label="$dnd_icon  Do Not Disturb  [on]"
+        else
+            dnd_icon="󰂛"; dnd_label="$dnd_icon  Do Not Disturb  [off]"
+        fi
+        idle_label="󰒲  Idle Inhibitor  [$(idle_inhibitor_status)]"
+
+        local choice
+        choice="$(printf '%s\n' \
+            "$dnd_label" \
+            "$idle_label" \
+            "󰔟  Lock Timer" \
+            | pick "󰔡  Toggles")" || return 1
+        case "$choice" in
+            *"Do Not Disturb"*) toggle_dnd ;;
+            *"Idle Inhibitor"*) toggle_idle_inhibitor ;;
+            *"Lock Timer"*)     set_lock_timer ;;
+        esac
+    done
+}
+
+main() {
+    while true; do
+        local choice
+        choice="$(printf '%s\n' \
+            "󰔡  Toggles" \
+            "󰔨  Themes" \
+            "󰸉  Wallpaper" \
+            "󰤨  Network" \
+            "󰣖  Services" \
+            "󱔢  Defaults" \
+            "󰐥  Power" \
+            | pick "  System")" || exit 0
+        case "$choice" in
+            "󰔡  Toggles")  toggles_menu ;;
+            "󰔨  Themes")   themes_menu && break ;;
+            "󰸉  Wallpaper") wallpaper_menu && break ;;
+            "󰤨  Network")  network_menu && break ;;
+            "󰣖  Services") services_menu ;;
+            "󱔢  Defaults") defaults_menu ;;
+            "󰐥  Power")    power_menu ;;
+        esac
+    done
+}
+
+main "$@"

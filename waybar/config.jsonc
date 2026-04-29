@@ -68,7 +68,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "~/.config/waybar/scripts/impala.sh"
+    "on-click": "~/.dotfiles/bin/xdg-terminal-exec impala"
   },
   "battery": {
     "format": "{capacity}% {icon}",
@@ -96,7 +96,7 @@
     "format-connected": "󰂱",
     "format-no-controller": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "~/.config/waybar/scripts/bluetui.sh"
+    "on-click": "~/.dotfiles/bin/xdg-terminal-exec bluetui"
   },
   "pulseaudio": {
     "format": "{icon}",
