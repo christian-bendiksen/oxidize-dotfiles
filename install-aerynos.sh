@@ -235,11 +235,21 @@ fi
 
 section "Shell config"
 
+PROFILE="$HOME/.profile"
+touch "$PROFILE"
+PROFILE_SNIPPET="# oxidize-dotfiles
+export PATH=\"\$HOME/.dotfiles/bin:\$PATH\""
+if grep -qF "oxidize-dotfiles" "$PROFILE"; then
+    ok "Profile: already configured"
+else
+    printf '\n%s\n' "$PROFILE_SNIPPET" >> "$PROFILE"
+    ok "Profile: added PATH to .profile"
+fi
+
 DOTFILES_BASHRC_SNIPPET="# oxidize-dotfiles bashrc
 if [ -f \"$DOTFILES_DIR/bashrc/bashrc.sh\" ]; then
     source \"$DOTFILES_DIR/bashrc/bashrc.sh\"
 fi"
-
 BASHRC="$HOME/.bashrc"
 touch "$BASHRC"
 if grep -qF "oxidize-dotfiles bashrc" "$BASHRC"; then
@@ -252,13 +262,15 @@ fi
 ZSHRC="$HOME/.zshrc"
 if [[ -f "$ZSHRC" ]] || command -v zsh &>/dev/null; then
     touch "$ZSHRC"
-    DOTFILES_ZSHRC_SNIPPET="# oxidize-dotfiles
-export PATH=\"$HOME/.dotfiles/bin:\$PATH\""
+    ZSHRC_SNIPPET="# oxidize-dotfiles
+if [ -f \"$DOTFILES_DIR/bashrc/bashrc.sh\" ]; then
+    source \"$DOTFILES_DIR/bashrc/bashrc.sh\"
+fi"
     if grep -qF "oxidize-dotfiles" "$ZSHRC"; then
         ok "Zsh: already configured"
     else
-        printf '\n%s\n' "$DOTFILES_ZSHRC_SNIPPET" >> "$ZSHRC"
-        ok "Zsh: added PATH to .zshrc"
+        printf '\n%s\n' "$ZSHRC_SNIPPET" >> "$ZSHRC"
+        ok "Zsh: added dotfiles source to .zshrc"
     fi
 fi
 
