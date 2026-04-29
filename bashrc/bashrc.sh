@@ -1,5 +1,8 @@
 # AerynOS stateless shell
 source /usr/share/defaults/aeryn-stateless-shell-conf.sh
+
+export PATH="$HOME/.dotfiles/bin:$PATH"
+
 # oxidize
 alias theme='oxidize'
 alias omarchy-theme-install='oxidize install'

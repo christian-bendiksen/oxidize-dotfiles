@@ -194,12 +194,6 @@ link "$DOTFILES_DIR/oxidize/themes/data"      "$HOME/.config/oxidize/themes/data
 link "$DOTFILES_DIR/oxidize/themes/templates" "$HOME/.config/oxidize/themes/templates"
 oxidize init
 
-section "Helper scripts"
-
-mkdir -p "$HOME/.local/bin"
-link "$DOTFILES_DIR/bin/oxidize-sysctl"    "$HOME/.local/bin/oxidize-sysctl"
-link "$DOTFILES_DIR/bin/xdg-terminal-exec" "$HOME/.local/bin/xdg-terminal-exec"
-
 section "Common config directories"
 
 COMMON_CONFIGS=(
@@ -239,21 +233,45 @@ if [[ -e "$DOTFILES_DIR/niri" ]]; then
     link "$OXIDIZE_CURRENT/niri-colors.kdl" "$HOME/.config/niri/niri-colors.kdl"
 fi
 
-section "Bash config"
+section "Shell config"
 
-BASHRC="$HOME/.bashrc"
-touch "$BASHRC"
-ALIASES_SNIPPET="# oxidize-dotfiles bashrc
+DOTFILES_BASHRC_SNIPPET="# oxidize-dotfiles bashrc
 if [ -f \"$DOTFILES_DIR/bashrc/bashrc.sh\" ]; then
     source \"$DOTFILES_DIR/bashrc/bashrc.sh\"
 fi"
-## TODO: add fish, zsh
 
+BASHRC="$HOME/.bashrc"
+touch "$BASHRC"
 if grep -qF "oxidize-dotfiles bashrc" "$BASHRC"; then
-    ok "Bash config already sourced in .bashrc"
+    ok "Bash: already configured"
 else
-    printf '\n%s\n' "$ALIASES_SNIPPET" >> "$BASHRC"
-    ok "Added bash config to .bashrc"
+    printf '\n%s\n' "$DOTFILES_BASHRC_SNIPPET" >> "$BASHRC"
+    ok "Bash: added dotfiles source to .bashrc"
+fi
+
+ZSHRC="$HOME/.zshrc"
+if [[ -f "$ZSHRC" ]] || command -v zsh &>/dev/null; then
+    touch "$ZSHRC"
+    DOTFILES_ZSHRC_SNIPPET="# oxidize-dotfiles
+export PATH=\"$HOME/.dotfiles/bin:\$PATH\""
+    if grep -qF "oxidize-dotfiles" "$ZSHRC"; then
+        ok "Zsh: already configured"
+    else
+        printf '\n%s\n' "$DOTFILES_ZSHRC_SNIPPET" >> "$ZSHRC"
+        ok "Zsh: added PATH to .zshrc"
+    fi
+fi
+
+if command -v fish &>/dev/null; then
+    FISH_CONF_DIR="$HOME/.config/fish/conf.d"
+    FISH_PATH_FILE="$FISH_CONF_DIR/oxidize-path.fish"
+    mkdir -p "$FISH_CONF_DIR"
+    if [[ -f "$FISH_PATH_FILE" ]]; then
+        ok "Fish: already configured"
+    else
+        printf 'fish_add_path %s/.dotfiles/bin\n' "$HOME" > "$FISH_PATH_FILE"
+        ok "Fish: added PATH to conf.d/oxidize-path.fish"
+    fi
 fi
 
 section "Applying default theme"
