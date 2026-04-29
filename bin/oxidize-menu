@@ -20,9 +20,9 @@ notify() {
 }
 
 pick() {
-    local out
-    out="$(walker --dmenu -e --placeholder "$1")" || return 1
-    [ -n "$out" ] || return 1
+    local out rc
+    out="$(walker --dmenu --placeholder "$1")"; rc=$?
+    [[ $rc -eq 0 && -n "$out" ]] || return 1
     printf '%s\n' "$out"
 }
 
@@ -72,7 +72,7 @@ choose_desktop() {
 
 set_terminal() {
     local file
-    file="$(choose_desktop "  Terminal" '^Categories=.*TerminalEmulator')" || return 0
+    file="$(choose_desktop "Terminal" '^Categories=.*TerminalEmulator')" || return 0
     mkdir -p "$(dirname "$TERMINALS_LIST")"
     printf '%s\n' "$file" > "$TERMINALS_LIST"
     notify "Default terminal" "$file"
@@ -80,7 +80,7 @@ set_terminal() {
 
 set_browser() {
     local file
-    file="$(choose_desktop "󰖟  Browser" '^MimeType=.*x-scheme-handler/https')" || return 0
+    file="$(choose_desktop "Browser" '^MimeType=.*x-scheme-handler/https')" || return 0
     xdg-mime default "$file" \
         x-scheme-handler/http \
         x-scheme-handler/https \
@@ -91,14 +91,14 @@ set_browser() {
 
 set_file_manager() {
     local file
-    file="$(choose_desktop "󰉋  File Manager" '^MimeType=.*inode/directory')" || return 0
+    file="$(choose_desktop "File Manager" '^MimeType=.*inode/directory')" || return 0
     xdg-mime default "$file" inode/directory
     notify "Default file manager" "$file"
 }
 
 set_editor() {
     local file
-    file="$(choose_desktop "󰏤  Editor" '^Categories=.*TextEditor')" || return 0
+    file="$(choose_desktop "Editor" '^Categories=.*TextEditor')" || return 0
     xdg-mime default "$file" text/plain
     notify "Default editor" "$file"
 }
@@ -168,7 +168,7 @@ set_lock_timer() {
     local choice total
     choice="$(printf '%s\n' \
         "2 minutes" "5 minutes" "10 minutes" "15 minutes" "30 minutes" "Disabled" \
-        | pick "󰔟  Lock Timer")" || return 1
+        | pick "Lock Timer")" || return 1
     case "$choice" in
         "2 minutes")  total=120 ;;
         "5 minutes")  total=300 ;;
@@ -221,7 +221,7 @@ themes_menu() {
     local current
     current="$(current_theme)"
     local choice
-    choice="$(list_themes | pick "󰔨  Theme  ·${current}·")" || return 1
+    choice="$(list_themes | pick "Theme: ${current}")" || return 1
     [[ "$choice" == "$current" ]] && { notify "Theme" "Already using $choice"; return 0; }
     oxidize set "$choice"
     notify "Theme" "Switched to $choice"
@@ -250,7 +250,7 @@ wallpaper_menu() {
         | sort)
 
     local choice
-    choice="$(printf '%s\n' "${labels[@]}" | pick "󰸉  Wallpaper")" || return 1
+    choice="$(printf '%s\n' "${labels[@]}" | pick "Wallpaper")" || return 1
 
     local path="${label_to_path[$choice]}"
     [[ -z "$path" ]] && return 1
@@ -265,10 +265,10 @@ network_menu() {
     choice="$(printf '%s\n' \
         "󰤨  WiFi / Network" \
         "󰂯  Bluetooth" \
-        | pick "󰤨  Network")" || return 1
+        | pick "Network")" || return 1
     case "$choice" in
-        "󰤨  WiFi / Network") $HOME/.dotfiles/bin/xdg-terminal-exec impala ;;
-        "󰂯  Bluetooth")      $HOME/.dotfiles.bin/xdg-terminal-exec bluetui ;;
+        *WiFi*)      xdg-terminal-exec impala ;;
+        *Bluetooth*) xdg-terminal-exec bluetui ;;
     esac
 }
 
@@ -280,27 +280,27 @@ services_menu() {
             "󰂞  Restart Notifications" \
             "󰸉  Restart Wallpaper Daemon" \
             "󰍉  Reload Walker" \
-            | pick "󰣖  Services")" || return 1
+            | pick "Services")" || return 1
         case "$choice" in
-            "󰝘  Restart Waybar")
+            *Waybar*)
                 pkill -x waybar 2>/dev/null || true
                 waybar &
                 disown
                 notify "Services" "Waybar restarted"
                 ;;
-            "󰂞  Restart Notifications")
+            *Notifications*)
                 pkill -x mako 2>/dev/null || true
                 mako &
                 disown
                 notify "Services" "Mako restarted"
                 ;;
-            "󰸉  Restart Wallpaper Daemon")
+            *"Wallpaper Daemon"*)
                 pkill -x awww-daemon 2>/dev/null || true
                 awww-daemon &
                 disown
                 notify "Services" "Wallpaper daemon restarted"
                 ;;
-            "󰍉  Reload Walker")
+            *Walker*)
                 notify "Services" "Restarting Walker..."
                 pkill -x walker 2>/dev/null || true
                 walker &
@@ -319,13 +319,13 @@ power_menu() {
             "󰑓  Reboot" \
             "󰚦  Shutdown" \
             "󰗼  Logout" \
-            | pick "󰐥  Power")" || return 1
+            | pick "Power")" || return 1
         case "$choice" in
-            "󰌾  Lock")     hyprlock ;;
-            "󰒲  Suspend")  systemctl suspend ;;
-            "󰑓  Reboot")   systemctl reboot ;;
-            "󰚦  Shutdown") systemctl poweroff ;;
-            "󰗼  Logout")   compositor_quit ;;
+            *Lock*)     hyprlock ;;
+            *Suspend*)  systemctl suspend ;;
+            *Reboot*)   systemctl reboot ;;
+            *Shutdown*) systemctl poweroff ;;
+            *Logout*)   compositor_quit ;;
         esac
     done
 }
@@ -338,12 +338,12 @@ defaults_menu() {
             "󰖟  Browser" \
             "󰉋  File Manager" \
             "󰏤  Editor" \
-            | pick "󱔢  Defaults")" || return 1
+            | pick "Defaults")" || return 1
         case "$choice" in
-            "  Terminal")    set_terminal ;;
-            "󰖟  Browser")    set_browser ;;
-            "󰉋  File Manager") set_file_manager ;;
-            "󰏤  Editor")      set_editor ;;
+            *Terminal*)     set_terminal ;;
+            *Browser*)      set_browser ;;
+            *"File Manager"*) set_file_manager ;;
+            *Editor*)       set_editor ;;
         esac
     done
 }
@@ -363,7 +363,7 @@ toggles_menu() {
             "$dnd_label" \
             "$idle_label" \
             "󰔟  Lock Timer" \
-            | pick "󰔡  Toggles")" || return 1
+            | pick "Toggles")" || return 1
         case "$choice" in
             *"Do Not Disturb"*) toggle_dnd ;;
             *"Idle Inhibitor"*) toggle_idle_inhibitor ;;
@@ -383,15 +383,15 @@ main() {
             "󰣖  Services" \
             "󱔢  Defaults" \
             "󰐥  Power" \
-            | pick "  System")" || exit 0
+            | pick "System")" || exit 0
         case "$choice" in
-            "󰔡  Toggles")  toggles_menu ;;
-            "󰔨  Themes")   themes_menu && break ;;
-            "󰸉  Wallpaper") wallpaper_menu && break ;;
-            "󰤨  Network")  network_menu && break ;;
-            "󰣖  Services") services_menu || true ;;
-            "󱔢  Defaults") defaults_menu || true ;;
-            "󰐥  Power")    power_menu || true ;;
+            *Toggles*)   toggles_menu || true ;;
+            *Themes*)    themes_menu && break ;;
+            *Wallpaper*) wallpaper_menu && break ;;
+            *Network*)   network_menu && break ;;
+            *Services*)  services_menu || true ;;
+            *Defaults*)  defaults_menu || true ;;
+            *Power*)     power_menu || true ;;
         esac
     done
 }
