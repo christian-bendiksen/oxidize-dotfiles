@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# oxidize-sysctl — walker-driven system controls menu.
+# oxidize-menu
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ notify() {
 
 pick() {
     local out
-    out="$(walker --dmenu --placeholder "$1")" || return 1
+    out="$(walker --dmenu -e --placeholder "$1")" || return 1
     [ -n "$out" ] || return 1
     printf '%s\n' "$out"
 }
@@ -389,9 +389,9 @@ main() {
             "󰔨  Themes")   themes_menu && break ;;
             "󰸉  Wallpaper") wallpaper_menu && break ;;
             "󰤨  Network")  network_menu && break ;;
-            "󰣖  Services") services_menu ;;
-            "󱔢  Defaults") defaults_menu ;;
-            "󰐥  Power")    power_menu ;;
+            "󰣖  Services") services_menu || true ;;
+            "󱔢  Defaults") defaults_menu || true ;;
+            "󰐥  Power")    power_menu || true ;;
         esac
     done
 }
