@@ -268,10 +268,16 @@ Rectangle {
         }
     }
 
+    Timer {
+        interval: 200; running: true; repeat: false
+        onTriggered: {
+            if (userField.fieldText !== "") pwField.forceActiveFocus()
+            else userField.forceActiveFocus()
+        }
+    }
+
     Component.onCompleted: {
         sessionIdx = sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
         userField.fieldText = sddm.lastUser
-        if (userField.fieldText !== "") pwField.forceActiveFocus()
-        else userField.forceActiveFocus()
     }
 }
