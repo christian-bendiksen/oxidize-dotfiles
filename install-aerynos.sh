@@ -221,6 +221,12 @@ for wm in niri mango hypr; do
     fi
 done
 
+section "Systemd services"
+
+systemctl --user disable --now waybar.service 2>/dev/null \
+    && ok "waybar.service disabled (managed by oxidize-services)" \
+    || ok "waybar.service already disabled"
+
 section "Oxidize theme wiring"
 
 link "$OXIDIZE_CURRENT/gtk.css"         "$HOME/.config/gtk-3.0/gtk.css"
