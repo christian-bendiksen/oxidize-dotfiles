@@ -223,9 +223,9 @@ done
 
 section "Systemd services"
 
-systemctl --user disable --now waybar.service 2>/dev/null \
-    && ok "waybar.service disabled (managed by oxidize-services)" \
-    || ok "waybar.service already disabled"
+systemctl --user mask --now waybar.service \
+    && ok "waybar.service masked (managed by oxidize-services)" \
+    || warn "Failed to mask waybar.service"
 
 section "Oxidize theme wiring"
 
