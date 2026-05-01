@@ -12,8 +12,6 @@ DESKTOP_DIRS=(
 )
 THEMES_DIR="$HOME/.dotfiles/oxidize/themes/data"
 
-LOCK_WARN_OFFSET=60
-LOCK_TIMER_PID="/tmp/oxidize-lock-timer.pid"
 
 notify() {
     command -v notify-send >/dev/null 2>&1 && notify-send "$@" || printf '%s\n' "$*" >&2
@@ -126,7 +124,7 @@ idle_inhibitor_status() {
     [[ -z "$pid" ]] && { printf 'not running'; return; }
     local state
     state="$(ps -o state= -p "$pid" | tr -d ' ')"
-    [[ "$state" == T* ]] && printf 'inhibited' || printf 'active'
+    [[ "$state" == T* ]] && printf 'on' || printf 'off'
 }
 
 toggle_idle_inhibitor() {
@@ -147,40 +145,6 @@ toggle_idle_inhibitor() {
     fi
 }
 
-start_lock_timer() {
-    local total="$1"
-    if [[ -f "$LOCK_TIMER_PID" ]]; then
-        kill "$(cat "$LOCK_TIMER_PID")" 2>/dev/null || true
-        rm -f "$LOCK_TIMER_PID"
-    fi
-    [[ "$total" -gt 0 ]] || return 0
-    (
-        sleep $((total - LOCK_WARN_OFFSET))
-        notify-send -u critical "Screen Lock" "Screen will lock in 1 minute"
-        sleep "$LOCK_WARN_OFFSET"
-        hyprlock
-    ) &
-    printf '%d\n' "$!" > "$LOCK_TIMER_PID"
-    disown
-}
-
-set_lock_timer() {
-    local choice total
-    choice="$(printf '%s\n' \
-        "2 minutes" "5 minutes" "10 minutes" "15 minutes" "30 minutes" "Disabled" \
-        | pick "Lock Timer")" || return 1
-    case "$choice" in
-        "2 minutes")  total=120 ;;
-        "5 minutes")  total=300 ;;
-        "10 minutes") total=600 ;;
-        "15 minutes") total=900 ;;
-        "30 minutes") total=1800 ;;
-        "Disabled")   total=0 ;;
-        *) return 1 ;;
-    esac
-    start_lock_timer "$total"
-    notify "Lock Timer" "$choice"
-}
 
 dnd_active() {
     command -v makoctl >/dev/null 2>&1 && makoctl mode 2>/dev/null | grep -qx dnd
@@ -235,19 +199,20 @@ fmt_wallpaper_name() {
 }
 
 wallpaper_menu() {
+    local backgrounds_dir="$XDG_CONFIG_HOME/oxidize/themes/current/backgrounds"
     declare -A label_to_path
     local labels=()
 
     while IFS= read -r path; do
-        local theme name label
-        theme="$(basename "$(dirname "$(dirname "$path")")")"
-        name="$(fmt_wallpaper_name "$(basename "$path")")"
-        label="$theme  $name"
+        local label
+        label="$(fmt_wallpaper_name "$(basename "$path")")"
         label_to_path["$label"]="$path"
         labels+=("$label")
-    done < <(find "$THEMES_DIR" -path "*/backgrounds/*" -type f \
+    done < <(find -L "$backgrounds_dir" -maxdepth 1 -type f \
         \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.webp" \) \
         | sort)
+
+    [[ ${#labels[@]} -eq 0 ]] && { notify "Wallpaper" "No wallpapers found for current theme"; return 1; }
 
     local choice
     choice="$(printf '%s\n' "${labels[@]}" | pick "Wallpaper")" || return 1
@@ -362,12 +327,10 @@ toggles_menu() {
         choice="$(printf '%s\n' \
             "$dnd_label" \
             "$idle_label" \
-            "󰔟  Lock Timer" \
             | pick "Toggles")" || return 1
         case "$choice" in
             *"Do Not Disturb"*) toggle_dnd ;;
             *"Idle Inhibitor"*) toggle_idle_inhibitor ;;
-            *"Lock Timer"*)     set_lock_timer ;;
         esac
     done
 }
