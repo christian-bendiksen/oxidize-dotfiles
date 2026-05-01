@@ -267,8 +267,17 @@ services_menu() {
                 ;;
             *Walker*)
                 notify "Services" "Restarting Walker..."
-                pkill -x walker 2>/dev/null || true
-                walker &
+
+                gapplication quit dev.benz.walker 2>/dev/null || true
+
+                for _ in $(sec 1 50); do
+                    if ! gapplication list-apps | grep -qx 'dev.benz.walker'; then
+                        break
+                    fi
+                    sleep 0.1
+                done
+            
+                walker --gapplication-service >/tmp/walker.log 2>&1 &
                 disown
                 ;;
         esac
