@@ -1,26 +1,26 @@
-accent               = "#4a8050"
-cursor               = "#c8a840"
-foreground           = "#c4c8a0"
-background           = "#0e1612"
-selection_foreground = "#0e1612"
-selection_background = "#4a8050"
+accent               = "#A4B465"
+cursor               = "#F0BB78"
+foreground           = "#CFCAB2"
+background           = "#151A16"
+selection_foreground = "#151A16"
+selection_background = "#A4B465"
 
 # UI / terminal base colors
-color0  = "#0e1612"   # black         
-color1  = "#904028"   # red           (errors, diff-)
-color2  = "#4a8050"   # green         (diff+, member vars)
-color3  = "#a07848"   # yellow        (special, markup links)
-color4  = "#3d6888"   # blue          
-color5  = "#664e72"   # magenta       
-color6  = "#40907a"   # cyan          
-color7  = "#8a9e80"   # white         
+color0  = "#151A16"   # base
+color1  = "#C07A4F"   # errors
+color2  = "#A4B465"   # success, primary accent
+color3  = "#F0BB78"   # warnings
+color4  = "#626F47"   # info
+color5  = "#7E7A66"   # secondary
+color6  = "#6F8F7A"   # accent
+color7  = "#CFCAB2"   # main text
 
-# syntax highlight colors
-color8  = "#283c30"   # bright black      (cursorline, selection bg)
-color9  = "#a07848"   # bright red        (constants, numbers, variables)
-color10 = "#5a9862"   # bright green      (strings)
-color11 = "#c0a870"   # bright yellow     (types, attributes)
-color12 = "#5a98c0"   # bright blue       (functions, constructors)
-color13 = "#9878a8"   # bright magenta    (keywords, labels, namespace)
-color14 = "#4ea898"   # bright cyan       (escape chars)
-color15 = "#dcdec0"   # bright white      
+# bright colors / syntax highlight colors
+color8  = "#1E2520"   # surface
+color9  = "#F0BB78"   # constants, numbers, attention
+color10 = "#A4B465"   # strings, additions
+color11 = "#E6DDC7"   # types, attributes
+color12 = "#7F9168"   # functions, constructors
+color13 = "#8F947F"   # keywords, namespaces
+color14 = "#7FA696"   # operators, escapes
+color15 = "#F5ECD5"   # peak highlight only

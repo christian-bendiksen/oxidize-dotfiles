@@ -1,104 +1,150 @@
-@define-color selected-text #4a8050;
-@define-color text #c4c8a0;
-@define-color base #0e1612;
-@define-color border #3c5242;
-@define-color foreground #dcdec0;
-@define-color background #0e1612;
-@define-color accent #4a8050;
-@define-color stone #283c30;
-@define-color lichen #8a9e80;
-@define-color frost #dcdec0;
+@define-color selected-text #F5ECD5;
+@define-color text #CFCAB2;
+@define-color base #151A16;
+@define-color surface #1E2520;
+@define-color border #3A4438;
+@define-color foreground #E6DDC7;
+@define-color background #151A16;
+@define-color accent #A4B465;
+@define-color muted #8F947F;
+@define-color sunlight #F0BB78;
+
+window * {
+    all: unset;
+    color: @text;
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    line-height: 1em;
+}
 
 window {
-    background-color: transparent;
+    background: transparent;
     color: @text;
-    border: none;
-    padding: 0;
-    box-shadow: none;
+}
+
+window .normal-icons,
+window .large-icons,
+window .item-image,
+window .symbols {
+    -gtk-icon-size: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 2px;
+    margin: 2px;
+    display: inline-block;
 }
 
 window .box-wrapper {
-    border-radius: 4px;
-    border: 1px solid alpha(@border, 0.5);
-    border-left: 3px solid alpha(@accent, 0.65);
-    padding: 16px 24px;
-    background: alpha(@base, 0.94);
-    background-clip: padding-box;
-    box-shadow:
-        0 6px 32px rgba(0, 0, 0, 0.9),
-        inset 0 1px 0 alpha(@stone, 0.4);
+    background: @base;
+    border: 1px solid @border;
+    border-radius: 0;
+    padding: 6px;
+    margin: 0;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
-window .search-container,
-window .search {
-    background: alpha(@stone, 0.45);
-    color: @frost;
-    border: 1px solid alpha(@border, 0.4);
-    border-bottom: 1px solid alpha(@accent, 0.35);
-    border-radius: 3px;
-    padding: 12px 18px;
-    margin-top: 2px;
-    font-size: 10px;
-    font-weight: 400;
+window .search-container {
+    background: @base;
+    border: none;
+    border-bottom: 1px solid @border;
+    border-radius: 0;
+    padding: 6px 8px;
+    margin: 0 0 6px 0;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
 window .input {
-    color: @frost;
-    font-weight: 300;
+    background: transparent;
+    color: @foreground;
+    caret-color: @sunlight;
+    border-radius: 0;
+}
+
+window .content-container,
+window .scroll,
+window .list {
+    background: @base;
+    color: @text;
 }
 
 child {
-    padding: 0 2px;
     background: transparent;
-    border-radius: 2px;
-    border-left: 2px solid transparent;
-    transition: all 140ms ease-in-out;
+    color: @text;
 }
 
-child:hover .item-box,
+child .item-box {
+    background: transparent;
+    color: @text;
+    border-radius: 0;
+    padding: 6px 8px;
+}
+
+child .item-text {
+    color: @text;
+}
+
+child .item-subtext,
+child .item-description {
+    color: @muted;
+}
+
+child:hover .item-box {
+    background: @surface;
+}
+
+child:hover .item-text {
+    color: @foreground;
+}
+
+child:hover .item-subtext,
+child:hover .item-description {
+    color: @accent;
+}
+
 child:selected .item-box {
-    background: linear-gradient(
-        90deg,
-        alpha(@accent, 0.18),
-        alpha(@stone, 0.1) 55%,
-        transparent
-    );
-    border-left: 2px solid @accent;
-    transform: translateX(4px);
-    transition:
-        background 160ms cubic-bezier(0.25, 0.8, 0.25, 1),
-        transform 160ms cubic-bezier(0.25, 0.8, 0.25, 1),
-        border-left 160ms ease;
+    background: @surface;
 }
 
-child:selected .item-box * {
+child:selected .item-text {
     color: @selected-text;
 }
 
-child:hover .item-text,
-child:selected .item-text {
-    text-shadow: 0 0 8px alpha(@accent, 0.25);
+child:selected .item-subtext,
+child:selected .item-description {
+    color: @accent;
 }
 
-child,
-.item-box {
-    transition:
-        background 160ms cubic-bezier(0.25, 0.8, 0.25, 1),
-        border-left 160ms ease,
-        transform 160ms ease;
+window .keybinds {
+    background: @surface;
+    border-top: 1px solid @border;
+    padding: 5px 8px;
+    margin-top: 6px;
 }
 
-window .list child {
-    animation: avalanche 160ms ease-out forwards;
+window .global-keybinds,
+window .item-keybinds {
+    color: @muted;
 }
 
-@keyframes avalanche {
-    from {
-        transform: translateX(-14px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+window .placeholder,
+window .elephant-hint {
+    color: @muted;
+    padding: 8px;
+}
+
+window .preview {
+    background: @surface;
+    border-top: 1px solid @border;
+    padding: 8px;
+}
+
+window .error {
+    background: @surface;
+    color: @sunlight;
+    border-top: 1px solid @border;
+    padding: 8px;
 }
