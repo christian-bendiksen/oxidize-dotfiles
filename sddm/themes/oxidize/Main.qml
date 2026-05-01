@@ -38,10 +38,11 @@ Rectangle {
         id: field
         width: root.fieldW; height: root.fieldH
 
-        property alias fieldText:        input.text
-        property alias echoMode:         input.echoMode
+        property alias fieldText:         input.text
+        property alias echoMode:          input.echoMode
         property alias passwordCharacter: input.passwordCharacter
-        property string placeholder: ""
+        property string placeholder:  ""
+        property string initialText:  ""
         signal submitted()
 
         Rectangle {
@@ -116,7 +117,7 @@ Rectangle {
         id: sessionList
         model: sessionModel
         currentIndex: sessionIdx
-        visible: false; width: 0; height: 0
+        opacity: 0; width: 1; height: 1
         delegate: Item { property string sessionName: model.name }
     }
 
