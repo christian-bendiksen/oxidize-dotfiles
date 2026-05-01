@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 waybar &
 awww-daemon &
-swayosd-sever &
+swayosd-server &
 hypridle &
 elephant &
 walker --gapplication-service &
