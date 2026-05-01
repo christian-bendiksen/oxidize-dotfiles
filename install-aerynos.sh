@@ -198,7 +198,7 @@ section "Common config directories"
 
 COMMON_CONFIGS=(
     kitty alacritty waybar mako btop helix walker
-    gtk-3.0 gtk-4.0 fontconfig swayosd
+    gtk-3.0 gtk-4.0 fontconfig swayosd sddm
 )
 for cfg in "${COMMON_CONFIGS[@]}"; do
     src="$DOTFILES_DIR/$cfg"
@@ -234,6 +234,8 @@ link "$OXIDIZE_CURRENT/gtk.css"         "$HOME/.config/gtk-4.0/gtk.css"
 link "$OXIDIZE_CURRENT/mako.ini"        "$HOME/.config/mako/config"
 link "$OXIDIZE_CURRENT/btop.theme"      "$HOME/.config/btop/themes/current.theme"
 link "$OXIDIZE_CURRENT/helix.toml"      "$HOME/.config/helix/themes/oxidize.toml"
+link "$OXIDIZE_CURRENT/sddm-theme.conf" "$HOME/.config/sddm/themes/oxidize/theme.conf"
+link "$HOME/.config/oxidize/themes/background" "$HOME/.config/sddm/themes/oxidize/background"
 
 if [[ -e "$DOTFILES_DIR/niri" ]]; then
     link "$OXIDIZE_CURRENT/niri-colors.kdl" "$HOME/.config/niri/niri-colors.kdl"
@@ -290,6 +292,19 @@ if command -v fish &>/dev/null; then
         printf 'fish_add_path %s/.dotfiles/bin\n' "$HOME" > "$FISH_PATH_FILE"
         ok "Fish: added PATH to conf.d/oxidize-path.fish"
     fi
+fi
+
+section "Display manager (SDDM)"
+
+if command -v sddm &>/dev/null; then
+    sudo mkdir -p /etc/sddm.conf.d
+    sed "s|HOME|$HOME|g" "$DOTFILES_DIR/sddm/sddm.conf.d/oxidize.conf" \
+        | sudo tee /etc/sddm.conf.d/oxidize.conf > /dev/null
+    ok "SDDM configured (ThemeDir: ~/.config/sddm/themes)"
+    sudo systemctl enable sddm
+    ok "sddm enabled"
+else
+    warn "sddm not found — skipping display manager setup"
 fi
 
 section "Applying default theme"
