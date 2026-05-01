@@ -42,14 +42,14 @@
   "custom/oxidize": {
     "format": " ",
     "on-click": "walker",
-    "on-click-right": "xdg-terminal-exec"
+    "on-click-right": "oxidize-menu"
   },
 
   "cpu": {
     "interval": 5,
     "format": "󰍛",
-    "on-click": "",
-    "on-click-right": "kitty"
+    "on-click": "btop",
+    "on-click-right": "xdg-terminal-exec"
   },
   "clock": {
     "format": "{:L%A %H:%M}",
