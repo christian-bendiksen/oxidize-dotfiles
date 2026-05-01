@@ -48,8 +48,8 @@
   "cpu": {
     "interval": 5,
     "format": "󰍛",
-    "on-click": "btop",
-    "on-click-right": "xdg-terminal-exec"
+    "on-click": "xdg-terminal-exec btop",
+    "on-click-right": ""
   },
   "clock": {
     "format": "{:L%A %H:%M}",
@@ -68,7 +68,7 @@
     "tooltip-format-disconnected": "Disconnected",
     "interval": 3,
     "spacing": 1,
-    "on-click": "~/.dotfiles/bin/xdg-terminal-exec impala"
+    "on-click": "xdg-terminal-exec impala"
   },
   "battery": {
     "format": "{capacity}% {icon}",
@@ -96,7 +96,7 @@
     "format-connected": "󰂱",
     "format-no-controller": "",
     "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "~/.dotfiles/bin/xdg-terminal-exec bluetui"
+    "on-click": "xdg-terminal-exec bluetui"
   },
   "pulseaudio": {
     "format": "{icon}",
