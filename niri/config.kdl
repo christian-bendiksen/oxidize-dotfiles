@@ -375,7 +375,7 @@ binds {
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     Mod+Return hotkey-overlay-title="Open a Terminal" { spawn-sh "xdg-terminal-exec"; }
     Mod+A hotkey-overlay-title="Run an Application: walker" { spawn "walker"; }
-    Mod+Shift+S hotkey-overlay-title="Oxidize menu" { spawn-sh "oxidize-menu"; }
+    Mod+Space hotkey-overlay-title="Oxidize menu" { spawn-sh "oxidize-menu"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "hyprlock"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
