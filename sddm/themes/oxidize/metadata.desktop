@@ -1,0 +1,7 @@
+[SddmGreeterTheme]
+Name=Oxidize
+Description=Minimal SDDM theme matching oxidize/hyprlock
+Type=sddm-theme
+Version=1.0
+License=MIT
+MainScript=Main.qml
