@@ -91,16 +91,26 @@ link() {
 
 safe_pull() {
     local dir="$1"
+
     if ! git -C "$dir" diff --quiet || ! git -C "$dir" diff --cached --quiet; then
         warn "Local changes detected — stashing before update"
         git -C "$dir" stash push -m "oxidize-installer-backup-${TIMESTAMP}" --quiet
         ok "Changes stashed (recover with: git -C ${dir/$HOME/\~} stash pop)"
     fi
+
     git -C "$dir" fetch --quiet
-    while IFS= read -r f; do
-        [[ -f "$dir/$f" ]] && rm -f "$dir/$f"
-    done < <(git -C "$dir" diff --diff-filter=A --name-only HEAD origin/main)
-    git -C "$dir" merge --ff-only --quiet origin/main && ok "Updated ${dir/$HOME/\~}" \
+
+    # Remove only untracked files that now exist on origin/main
+    git -C "$dir" ls-files --others --exclude-standard -z |
+    while IFS= read -r -d '' f; do
+        if git -C "$dir" cat-file -e "origin/main:$f" 2>/dev/null; then
+            warn "Removing untracked file that would block merge: $f"
+            rm -f -- "$dir/$f"
+        fi
+    done
+
+    git -C "$dir" merge --ff-only --quiet origin/main \
+        && ok "Updated ${dir/$HOME/\~}" \
         || warn "git pull failed — continuing with current state"
 }
 
