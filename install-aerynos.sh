@@ -3,17 +3,21 @@
 #   bash <(curl -fsSL https://raw.githubusercontent.com/christian-bendiksen/oxidize-dotfiles/main/install-aerynos.sh)
 set -euo pipefail
 
+### Output helpers
+
 RED='\033[0;31m'
 GRN='\033[0;32m'
 YLW='\033[0;33m'
 BLU='\033[0;34m'
+CYN='\033[0;36m'
 BLD='\033[1m'
 DIM='\033[2m'
 RST='\033[0m'
 
-ok()   { printf "  ${GRN}✓${RST}  %s\n"       "$*"; }
-warn() { printf "  ${YLW}!${RST}  %s\n"        "$*"; }
-die()  { printf "  ${RED}✗${RST}  %s\n" "$*" >&2; exit 1; }
+ok()   { printf "  ${GRN}✓${RST}  %s\n"  "$*"; }
+info() { printf "  ${CYN}·${RST}  %s\n"  "$*"; }
+warn() { printf "  ${YLW}!${RST}  %s\n"  "$*"; }
+die()  { printf "  ${RED}✗${RST}  %s\n"  "$*" >&2; exit 1; }
 
 section() {
     local label=" $* " width=44
@@ -59,13 +63,20 @@ spin() {
         printf "\r  ${BLU}${frames[$((i++ % 10))]}${RST}  %s" "$msg"
         sleep 0.08
     done
-    printf "\r%*s\r" "$((${#msg} + 6))" ""  # clear the line
+    printf "\r%*s\r" "$((${#msg} + 6))" ""
 }
+
+### Constants
 
 DOTFILES_REPO="https://github.com/christian-bendiksen/oxidize-dotfiles"
 DOTFILES_DIR="$HOME/.dotfiles"
 OXIDIZE_CURRENT="$HOME/.config/oxidize/themes/current"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+
+FONT_VERSION="3.4.0"
+ADW_VERSION="6.4"
+
+### Helpers
 
 link() {
     local src="$1" dst="$2"
@@ -100,7 +111,6 @@ safe_pull() {
 
     git -C "$dir" fetch --quiet
 
-    # Remove only untracked files that now exist on origin/main
     git -C "$dir" ls-files --others --exclude-standard -z |
     while IFS= read -r -d '' f; do
         if git -C "$dir" cat-file -e "origin/main:$f" 2>/dev/null; then
@@ -113,6 +123,34 @@ safe_pull() {
         && ok "Updated ${dir/$HOME/\~}" \
         || warn "git pull failed — continuing with current state"
 }
+
+### fetch_and_extract URL DEST_DIR SPIN_MSG
+fetch_and_extract() {
+    local url="$1" dest_dir="$2" msg="$3"
+    local tmp="/tmp/oxidize-asset-${TIMESTAMP}-${RANDOM}"
+    {
+        curl -fsSL "$url" -o "$tmp"
+        case "$url" in
+            *.zip)
+                unzip -q "$tmp" -d "$dest_dir"
+                rm -f "$tmp"
+                fc-cache -f
+                ;;
+            *.tar.*)
+                tar -xf "$tmp" -C "$dest_dir"
+                rm -f "$tmp"
+                ;;
+            *)
+                rm -f "$tmp"
+                die "fetch_and_extract: unrecognised archive extension in: $url"
+                ;;
+        esac
+    } &
+    spin $! "$msg"
+    wait $!
+}
+
+### Banner + sanity checks
 
 banner
 
@@ -131,6 +169,19 @@ fi
 
 confirm "Proceed?" || { printf "\n  Aborted.\n\n"; exit 0; }
 
+### Pre-flight checks
+
+if ! $IS_UPDATE; then
+    section "Pre-flight checks"
+    command -v curl     &>/dev/null || die "'curl' not found — install it first."
+    command -v unzip    &>/dev/null || die "'unzip' not found — install it first."
+    command -v fc-cache &>/dev/null || die "'fc-cache' not found — install fontconfig first."
+    command -v envsubst &>/dev/null || die "'envsubst' not found — install gettext first."
+    ok "All required tools present"
+fi
+
+### Dotfiles
+
 section "Dotfiles"
 
 if $IS_UPDATE; then
@@ -146,6 +197,8 @@ else
     ok "Cloned to ~/.dotfiles"
 fi
 
+### Window manager
+
 if ! $IS_UPDATE; then
     section "Window manager"
 
@@ -158,6 +211,8 @@ if ! $IS_UPDATE; then
         || warn "Failed to install $PKGSET — continuing anyway"
 fi
 
+### Assets
+
 section "JetBrains Mono Nerd Font"
 
 FONT_DIR="$HOME/.local/share/fonts/JetbrainsMono"
@@ -165,16 +220,10 @@ if [[ -d "$FONT_DIR" ]]; then
     ok "Already installed"
 else
     mkdir -p "$FONT_DIR"
-    {
-        curl -fsSL \
-            "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip" \
-            -o /tmp/JetBrainsMono.zip
-        unzip -q /tmp/JetBrainsMono.zip -d "$FONT_DIR"
-        rm /tmp/JetBrainsMono.zip
-        fc-cache -f
-    } &
-    spin $! "Downloading & installing font…"
-    wait $!
+    fetch_and_extract \
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v${FONT_VERSION}/JetBrainsMono.zip" \
+        "$FONT_DIR" \
+        "Downloading & installing font…"
     ok "Installed → ~/.local/share/fonts/JetbrainsMono"
 fi
 
@@ -185,23 +234,22 @@ if ls "$ADW_DIR"/adw-gtk3* &>/dev/null 2>&1; then
     ok "Already installed"
 else
     mkdir -p "$ADW_DIR"
-    {
-        curl -fsSL \
-            "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.4/adw-gtk3v6.4.tar.xz" \
-            -o /tmp/adw-gtk3.tar.xz
-        tar -xf /tmp/adw-gtk3.tar.xz -C "$ADW_DIR"
-        rm /tmp/adw-gtk3.tar.xz
-    } &
-    spin $! "Downloading & extracting theme…"
-    wait $!
+    fetch_and_extract \
+        "https://github.com/lassekongo83/adw-gtk3/releases/download/v${ADW_VERSION}/adw-gtk3v${ADW_VERSION}.tar.xz" \
+        "$ADW_DIR" \
+        "Downloading & extracting theme…"
     ok "Installed → ~/.local/share/themes"
 fi
+
+### Oxidize theme directories
 
 section "Oxidize theme directories"
 
 link "$DOTFILES_DIR/oxidize/themes/data"      "$HOME/.config/oxidize/themes/data"
 link "$DOTFILES_DIR/oxidize/themes/templates" "$HOME/.config/oxidize/themes/templates"
 oxidize init
+
+### Common config directories
 
 section "Common config directories"
 
@@ -219,7 +267,10 @@ for cfg in "${COMMON_CONFIGS[@]}"; do
 done
 
 link "$DOTFILES_DIR/chromium-flags.conf" "$HOME/.config/chromium-flags.conf"
+link "$DOTFILES_DIR/brave-flags.conf"    "$HOME/.config/brave-flags.conf"
 link "$DOTFILES_DIR/bashrc"              "$HOME/.config/bashrc"
+
+### Window-manager configs
 
 section "Window-manager configs"
 
@@ -230,11 +281,15 @@ for wm in niri mango hypr; do
     fi
 done
 
+### Systemd services
+
 section "Systemd services"
 
 systemctl --user mask --now waybar.service \
     && ok "waybar.service masked (managed by oxidize-services)" \
     || warn "Failed to mask waybar.service"
+
+### Oxidize theme wiring
 
 section "Oxidize theme wiring"
 
@@ -249,6 +304,8 @@ link "$HOME/.config/oxidize/themes/background" "$HOME/.config/sddm/themes/oxidiz
 if [[ -e "$DOTFILES_DIR/niri" ]]; then
     link "$OXIDIZE_CURRENT/niri-colors.kdl" "$HOME/.config/niri/niri-colors.kdl"
 fi
+
+### Shell config
 
 section "Shell config"
 
@@ -303,11 +360,13 @@ if command -v fish &>/dev/null; then
     fi
 fi
 
+### Display manager (SDDM)
+
 section "Display manager (SDDM)"
 
 if command -v sddm &>/dev/null; then
     sudo mkdir -p /etc/sddm.conf.d
-    sed "s|HOME|$HOME|g" "$DOTFILES_DIR/sddm/sddm.conf.d/oxidize.conf" \
+    envsubst '$HOME' < "$DOTFILES_DIR/sddm/sddm.conf.d/oxidize.conf" \
         | sudo tee /etc/sddm.conf.d/oxidize.conf > /dev/null
     ok "SDDM configured (ThemeDir: ~/.config/sddm/themes)"
     sudo systemctl enable sddm
@@ -315,6 +374,8 @@ if command -v sddm &>/dev/null; then
 else
     warn "sddm not found — skipping display manager setup"
 fi
+
+### Apply theme
 
 section "Applying default theme"
 
