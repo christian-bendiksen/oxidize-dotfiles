@@ -118,7 +118,6 @@ banner
 
 [[ "$EUID" -eq 0 ]] && die "Do not run as root."
 command -v git &>/dev/null || die "'git' not found — install it first."
-command -v oxidize &>/dev/null || die "'oxidize' not found — install the oxidize pkgset first."
 
 IS_UPDATE=false
 if [[ -d "$DOTFILES_DIR/.git" ]]; then
