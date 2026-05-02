@@ -255,7 +255,7 @@ section "Common config directories"
 
 COMMON_CONFIGS=(
     kitty alacritty waybar mako btop helix walker
-    gtk-3.0 gtk-4.0 fontconfig swayosd sddm
+    gtk-3.0 gtk-4.0 fontconfig swayosd sddm xdg-desktop-portal
 )
 for cfg in "${COMMON_CONFIGS[@]}"; do
     src="$DOTFILES_DIR/$cfg"
