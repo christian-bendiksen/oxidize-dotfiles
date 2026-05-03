@@ -41,6 +41,7 @@
   },
   "custom/oxidize": {
     "format": " ",
+    "tooltip-format": "Oxidize menu",
     "on-click": "walker",
     "on-click-right": "oxidize-menu"
   },
