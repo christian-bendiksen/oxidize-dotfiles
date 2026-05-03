@@ -91,13 +91,29 @@ link() {
         ok "(already linked) ${dst/$HOME/\~}"
         return
     fi
-    if [[ -e "$dst" || -L "$dst" ]]; then
+    if [[ -L "$dst" ]]; then
+        rm "$dst"
+    elif [[ -e "$dst" ]]; then
         warn "Backing up ${dst/$HOME/\~}"
         mv "$dst" "${dst}.bak.${TIMESTAMP}"
     fi
     mkdir -p "$(dirname "$dst")"
     ln -s "$src" "$dst"
     ok "${dst/$HOME/\~} → ${src/$HOME/\~}"
+}
+
+link_dir() {
+    local src_dir="$1" dst_dir="$2"
+    src_dir="${src_dir%/}"; dst_dir="${dst_dir%/}"
+    # Convert an existing directory symlink to a real directory
+    if [[ -L "$dst_dir" ]]; then
+        rm "$dst_dir"
+    fi
+    mkdir -p "$dst_dir"
+    while IFS= read -r -d '' src_file; do
+        local rel="${src_file#$src_dir/}"
+        link "$src_file" "$dst_dir/$rel"
+    done < <(find "$src_dir" \( -type f -o -type l \) ! -name '.gitkeep' -print0)
 }
 
 safe_pull() {
@@ -259,7 +275,9 @@ COMMON_CONFIGS=(
 )
 for cfg in "${COMMON_CONFIGS[@]}"; do
     src="$DOTFILES_DIR/$cfg"
-    if [[ -e "$src" ]]; then
+    if [[ -d "$src" ]]; then
+        link_dir "$src" "$HOME/.config/$cfg"
+    elif [[ -f "$src" ]]; then
         link "$src" "$HOME/.config/$cfg"
     else
         warn "$cfg not in repo — skipping"
@@ -268,7 +286,7 @@ done
 
 link "$DOTFILES_DIR/chromium-flags.conf" "$HOME/.config/chromium-flags.conf"
 link "$DOTFILES_DIR/brave-flags.conf"    "$HOME/.config/brave-flags.conf"
-link "$DOTFILES_DIR/bashrc"              "$HOME/.config/bashrc"
+link_dir "$DOTFILES_DIR/bashrc"          "$HOME/.config/bashrc"
 
 ### Window-manager configs
 
@@ -277,9 +295,25 @@ section "Window-manager configs"
 for wm in niri mango hypr; do
     src="$DOTFILES_DIR/$wm"
     if [[ -e "$src" ]]; then
-        link "$src" "$HOME/.config/$wm"
+        link_dir "$src" "$HOME/.config/$wm"
     fi
 done
+
+### User overrides
+
+section "User overrides"
+
+USER_DIR="$DOTFILES_DIR/user"
+mkdir -p "$USER_DIR"
+
+if [[ -n "$(find "$USER_DIR" -type f -print -quit 2>/dev/null)" ]]; then
+    while IFS= read -r -d '' user_file; do
+        rel="${user_file#$USER_DIR/}"
+        link "$user_file" "$HOME/.config/$rel"
+    done < <(find "$USER_DIR" -type f -print0)
+else
+    info "No user overrides — add files to ~/.dotfiles/user/ to customize"
+fi
 
 ### Systemd services
 
@@ -380,6 +414,7 @@ fi
 section "Applying default theme"
 
 oxidize set aeryn
+gsettings set org.gnome.desktop.interface font-name 'Adwaita Sans 9.5'
 ok "Theme set to aeryn"
 
 printf "\n  ${GRN}${BLD}Setup complete.${RST}\n"
