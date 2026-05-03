@@ -323,6 +323,8 @@ systemctl --user mask --now waybar.service \
     && ok "waybar.service masked (managed by oxidize-services)" \
     || warn "Failed to mask waybar.service"
 
+sudo systemctl enable swayosd-libinput-backend.service
+
 ### Oxidize theme wiring
 
 section "Oxidize theme wiring"
