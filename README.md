@@ -33,6 +33,7 @@ Available themes: aeryn, catppuccin, catppuccin-latte, ethereal,
 everforest, flexoki-light, gruvbox, hackerman, kanagawa, matte-black,
 miasma, nord, osaka-jade, ristretto, rose-pine, tokyo-night, vantablack,
 white.
+Omarchy themes have a 1:1 compatibility (well, soon) and can be installed.
 
 Use `oxidize-menu` for an interactive picker, wallpaper selection, and
 other system controls.
