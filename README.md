@@ -2,6 +2,7 @@
 
 Wayland desktop dotfiles for AerynOS with an atomic theme switcher
 powered by [oxidize](https://github.com/christian-bendiksen/oxidize-theme).
+
 Heavily inspired by Omarchy.
 
 ## Requirements
